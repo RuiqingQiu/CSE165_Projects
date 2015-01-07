@@ -4,7 +4,7 @@
 //
 //  Created by Ruiqing Qiu on 1/7/15.
 //  Copyright (c) 2015 Ruiqing Qiu. All rights reserved.
-//
+// this is a new message
 
 #include "main.h"
 #include <iostream>
