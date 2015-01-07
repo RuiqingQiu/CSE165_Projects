@@ -1,0 +1,43 @@
+file(REMOVE_RECURSE
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3BroadphaseCallback.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3DynamicBvh.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3DynamicBvhBroadphase.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3OverlappingPair.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3OverlappingPairCache.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3Aabb.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3BvhSubtreeInfoData.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3BvhTraversal.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3ClipFaces.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3Collidable.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3Contact4Data.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3ContactConvexConvexSAT.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3ContactSphereSphere.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3ConvexPolyhedronData.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3FindConcaveSatAxis.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3FindSeparatingAxis.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3MprPenetration.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3NewContactReduction.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3QuantizedBvhNodeData.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3ReduceContacts.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3RigidBodyData.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3UpdateAabbs.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3Config.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3Contact4.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3ConvexUtility.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3CpuNarrowPhase.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3RaycastInfo.h"
+  "Bullet3Collision.framework/Versions/2.83/Headers/b3RigidBodyCL.h"
+  "CMakeFiles/Bullet3Collision.dir/BroadPhaseCollision/b3DynamicBvh.o"
+  "CMakeFiles/Bullet3Collision.dir/BroadPhaseCollision/b3DynamicBvhBroadphase.o"
+  "CMakeFiles/Bullet3Collision.dir/BroadPhaseCollision/b3OverlappingPairCache.o"
+  "CMakeFiles/Bullet3Collision.dir/NarrowPhaseCollision/b3ConvexUtility.o"
+  "CMakeFiles/Bullet3Collision.dir/NarrowPhaseCollision/b3CpuNarrowPhase.o"
+  "Bullet3Collision.framework/Bullet3Collision.pdb"
+  "Bullet3Collision.framework/Bullet3Collision"
+  "Bullet3Collision.framework/Versions/2.83/Bullet3Collision"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang CXX)
+  include(CMakeFiles/Bullet3Collision.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()
