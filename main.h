@@ -10,5 +10,11 @@
 #define __CSE165_HW1__main__
 
 #include <stdio.h>
+#include "cube.h"
+namespace Globals
+{
+    extern Cube cube;
+};
+
 
 #endif /* defined(__CSE165_HW1__main__) */
