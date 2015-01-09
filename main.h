@@ -25,4 +25,9 @@ namespace Globals
     extern Camera* camera;
     extern MatrixTransform root;
 };
+void physics_setup();
+void physics_cleanup();
+void initWalls();
+
+
 #endif /* defined(__CSE165_HW1__main__) */

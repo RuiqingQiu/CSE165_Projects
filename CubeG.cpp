@@ -17,7 +17,8 @@ CubeG::CubeG(){
 
 void CubeG::render(){
     glColor3f(color.x, color.y, color.z);
-    glutSolidCube(2);
+    //glutSolidCube(2);
+    glutSolidSphere(1, 20, 20);
 }
 
 void CubeG::update(){

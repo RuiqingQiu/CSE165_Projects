@@ -16,7 +16,9 @@ MatrixTransform::MatrixTransform(Matrix4 M){
     
 }
 void MatrixTransform::draw(Matrix4 C){
+    M.print("M ");
     Matrix4 C_new = C * M;
+    C_new.print("C new" );
     if(isRoot){
         for (std::list<Node*>::iterator it = children.begin(); it != children.end(); it++){
             (*it)->draw(C_new);

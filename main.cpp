@@ -19,48 +19,74 @@ namespace Globals
     Camera* camera;
     MatrixTransform root;
 }
-
-int main (int argc, char *argv[])
-{
-    srand (time(NULL));
-
-    btBroadphaseInterface* broadphase = new btDbvtBroadphase();
+btBroadphaseInterface* broadphase;
+btDefaultCollisionConfiguration* collisionConfiguration;
+btCollisionDispatcher* dispatcher;
+btSequentialImpulseConstraintSolver* solver;
+btCollisionShape* groundShape;
+btRigidBody* groundRigidBody;
+void physics_setup(){
+    broadphase = new btDbvtBroadphase();
     
-    btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
-    btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collisionConfiguration);
+    collisionConfiguration = new btDefaultCollisionConfiguration();
+    dispatcher = new btCollisionDispatcher(collisionConfiguration);
     
-    btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
+    solver = new btSequentialImpulseConstraintSolver;
     
     Globals::dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
     
     Globals::dynamicsWorld->setGravity(btVector3(0, -10, 0));
     
     
-    btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 1);
-    
-    btCollisionShape* fallShape = new btSphereShape(1);
-
+    groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 1);
     
     btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -1, 0)));
     btRigidBody::btRigidBodyConstructionInfo
     groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
-    btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
+    groundRigidBodyCI.m_friction = 1.5f;
+    
+    groundRigidBody = new btRigidBody(groundRigidBodyCI);
     groundRigidBody->setRestitution(0);
     Globals::dynamicsWorld->addRigidBody(groundRigidBody);
     
     
-    btDefaultMotionState* fallMotionState =
-    new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 10, 0)));
-    btScalar mass = 1;
-    btVector3 fallInertia(0, 0, 0);
-    fallShape->calculateLocalInertia(mass, fallInertia);
-    btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallShape, fallInertia);
-    Globals::fallRigidBody = new btRigidBody(fallRigidBodyCI);
-    Globals::fallRigidBody->setRestitution(0);
-    Globals::dynamicsWorld->addRigidBody(Globals::fallRigidBody);
-
+    //    btDefaultMotionState* fallMotionState =
+    //    new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 10, 0)));
+    //    btScalar mass = 1;
+    //    btVector3 fallInertia(0, 0, 0);
+    //    fallShape->calculateLocalInertia(mass, fallInertia);
+    //    btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallShape, fallInertia);
+    //    Globals::fallRigidBody = new btRigidBody(fallRigidBodyCI);
+    //    Globals::fallRigidBody->setRestitution(0);
+    //    Globals::dynamicsWorld->addRigidBody(Globals::fallRigidBody);
+}
+void physics_cleanup(){
+    //Delete all the physics objects
+    Globals::dynamicsWorld->removeRigidBody(Globals::fallRigidBody);
+    delete Globals::fallRigidBody->getMotionState();
+    delete Globals::fallRigidBody;
     
-    float specular[]  = {1.0, 1.0, 1.0, 1.0};
+    Globals::dynamicsWorld->removeRigidBody(groundRigidBody);
+    delete groundRigidBody->getMotionState();
+    delete groundRigidBody;
+    
+    
+    delete groundShape;
+    
+    
+    delete Globals::dynamicsWorld;
+    delete solver;
+    delete collisionConfiguration;
+    delete dispatcher;
+    delete broadphase;
+    
+
+}
+int main (int argc, char *argv[])
+{
+    srand (time(NULL));
+    physics_setup();
+        float specular[]  = {1.0, 1.0, 1.0, 1.0};
     float shininess[] = {100.0};
     
     glutInit(&argc, argv);      	      	      // initialize GLUT
@@ -105,7 +131,18 @@ int main (int argc, char *argv[])
     Globals::camera->update();
     Globals::root.isRoot = true;
     
+    initWalls();
+
+
+    glutMainLoop();
+    physics_cleanup();
     
+    
+    return 0;
+}
+void initWalls(){
+    Window::b_list.clear();
+
     int row_max = 10;
     int col_max = 10;
     
@@ -121,42 +158,9 @@ int main (int argc, char *argv[])
                 b.physics(-row_max+2*i, j*2, 0);
             }
             Window::b_list.push_back(b);
-            Globals::root.addChild(b.world);
         }
     }
-    Window::tmp = Brick(Vector3(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX));
-    Window::tmp.setLocation(0, 10, 5);
-    Window::tmp.physics(0,10,5);
-    Globals::root.addChild(Window::tmp.world);
-
-    Ball b = Ball(Vector3(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX));
-    b.setLocation(0, col_max , 5);
-    Globals::root.addChild(b.world);
-
-    glutMainLoop();
-    
-    
-    //Delete all the physics objects
-    Globals::dynamicsWorld->removeRigidBody(Globals::fallRigidBody);
-    delete Globals::fallRigidBody->getMotionState();
-    delete Globals::fallRigidBody;
-    
-    Globals::dynamicsWorld->removeRigidBody(groundRigidBody);
-    delete groundRigidBody->getMotionState();
-    delete groundRigidBody;
-    
-    
-    delete fallShape;
-    
-    delete groundShape;
-    
-    
-    delete Globals::dynamicsWorld;
-    delete solver;
-    delete collisionConfiguration;
-    delete dispatcher;
-    delete broadphase;
-    
-    
-    return 0;
+    Window::ball = Ball(Vector3(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX));
+    Window::ball.setLocation(0, 20, 0);
+    Window::ball.physics(0,20,0);
 }

@@ -29,7 +29,7 @@ public:
     static void shadow_set_up();
     static int LoadGLTextures();
     
-    static Brick tmp;
+    static Ball ball;
     static vector<Brick> b_list;
     
 };
