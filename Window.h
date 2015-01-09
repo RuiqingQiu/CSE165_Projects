@@ -12,7 +12,9 @@
 #include <stdio.h>
 #include <GLUT/GLUT.h>
 #include "Matrix4.h"
+#include "CubeG.h"
 #include "main.h"
+#include "Brick.h"
 
 class Window	  // OpenGL output window related routines
 {
@@ -26,8 +28,9 @@ public:
     static void processNormalKeys(unsigned char key, int x, int y);
     static void shadow_set_up();
     static int LoadGLTextures();
-
-
+    
+    static Brick tmp;
+    static vector<Brick> b_list;
     
 };
 #endif /* defined(__CSE167_Final_Project__Window__) */

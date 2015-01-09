@@ -15,6 +15,14 @@
 		AA4925051A5E233F00C75039 /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA4925041A5E233F00C75039 /* Matrix4.cpp */; };
 		AA4925081A5E23B600C75039 /* Window.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA4925061A5E23B600C75039 /* Window.cpp */; };
 		AA49250B1A5E24CB00C75039 /* cube.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA4925091A5E24CB00C75039 /* cube.cpp */; };
+		AA4925251A5F4B8D00C75039 /* MatrixTransform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA49251D1A5F4B8D00C75039 /* MatrixTransform.cpp */; };
+		AA4925261A5F4B8D00C75039 /* Geode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA49251F1A5F4B8D00C75039 /* Geode.cpp */; };
+		AA4925271A5F4B8D00C75039 /* Group.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA4925211A5F4B8D00C75039 /* Group.cpp */; };
+		AA4925281A5F4B8D00C75039 /* Node.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA4925231A5F4B8D00C75039 /* Node.cpp */; };
+		AA49252E1A5F4BE400C75039 /* CubeG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA49252A1A5F4BE400C75039 /* CubeG.cpp */; };
+		AA49252F1A5F4BE400C75039 /* Sphere.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA49252C1A5F4BE400C75039 /* Sphere.cpp */; };
+		AA4925321A5F50CA00C75039 /* Brick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA4925301A5F50CA00C75039 /* Brick.cpp */; };
+		AA4925351A5F59F000C75039 /* Ball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA4925331A5F59F000C75039 /* Ball.cpp */; };
 		AA94A9D51A5DD302001E9E6F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA94A9D31A5DD302001E9E6F /* main.cpp */; };
 		AA94A9D71A5DD45A001E9E6F /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA94A9D61A5DD45A001E9E6F /* OpenGL.framework */; };
 		AA94A9D91A5DD45E001E9E6F /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA94A9D81A5DD45E001E9E6F /* GLUT.framework */; };
@@ -46,6 +54,22 @@
 		AA4925071A5E23B600C75039 /* Window.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Window.h; sourceTree = "<group>"; };
 		AA4925091A5E24CB00C75039 /* cube.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cube.cpp; sourceTree = "<group>"; };
 		AA49250A1A5E24CB00C75039 /* cube.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cube.h; sourceTree = "<group>"; };
+		AA49251D1A5F4B8D00C75039 /* MatrixTransform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MatrixTransform.cpp; sourceTree = "<group>"; };
+		AA49251E1A5F4B8D00C75039 /* MatrixTransform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MatrixTransform.h; sourceTree = "<group>"; };
+		AA49251F1A5F4B8D00C75039 /* Geode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Geode.cpp; sourceTree = "<group>"; };
+		AA4925201A5F4B8D00C75039 /* Geode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Geode.h; sourceTree = "<group>"; };
+		AA4925211A5F4B8D00C75039 /* Group.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Group.cpp; sourceTree = "<group>"; };
+		AA4925221A5F4B8D00C75039 /* Group.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Group.h; sourceTree = "<group>"; };
+		AA4925231A5F4B8D00C75039 /* Node.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Node.cpp; sourceTree = "<group>"; };
+		AA4925241A5F4B8D00C75039 /* Node.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Node.h; sourceTree = "<group>"; };
+		AA49252A1A5F4BE400C75039 /* CubeG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CubeG.cpp; sourceTree = "<group>"; };
+		AA49252B1A5F4BE400C75039 /* CubeG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CubeG.h; sourceTree = "<group>"; };
+		AA49252C1A5F4BE400C75039 /* Sphere.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sphere.cpp; sourceTree = "<group>"; };
+		AA49252D1A5F4BE400C75039 /* Sphere.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sphere.h; sourceTree = "<group>"; };
+		AA4925301A5F50CA00C75039 /* Brick.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Brick.cpp; sourceTree = "<group>"; };
+		AA4925311A5F50CA00C75039 /* Brick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Brick.h; sourceTree = "<group>"; };
+		AA4925331A5F59F000C75039 /* Ball.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Ball.cpp; sourceTree = "<group>"; };
+		AA4925341A5F59F000C75039 /* Ball.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ball.h; sourceTree = "<group>"; };
 		AA949CB21A5DBCD1001E9E6F /* CSE165 HW1 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "CSE165 HW1"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA94A9D31A5DD302001E9E6F /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		AA94A9D41A5DD302001E9E6F /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
@@ -410,15 +434,11 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		AA949CA91A5DBCD1001E9E6F = {
+		AA49251C1A5F4B4700C75039 /* Helper */ = {
 			isa = PBXGroup;
 			children = (
-				AA4925091A5E24CB00C75039 /* cube.cpp */,
-				AA49250A1A5E24CB00C75039 /* cube.h */,
-				AA4925061A5E23B600C75039 /* Window.cpp */,
-				AA4925071A5E23B600C75039 /* Window.h */,
-				AA94A9D31A5DD302001E9E6F /* main.cpp */,
-				AA94A9D41A5DD302001E9E6F /* main.h */,
+				AA94B4C01A5DD59B001E9E6F /* btBulletCollisionCommon.h */,
+				AA94B4C11A5DD59B001E9E6F /* btBulletDynamicsCommon.h */,
 				AA4925031A5E233F00C75039 /* Matrix4.h */,
 				AA4925041A5E233F00C75039 /* Matrix4.cpp */,
 				AA4925001A5E232C00C75039 /* Camera.h */,
@@ -427,8 +447,44 @@
 				AA4924FB1A5E231B00C75039 /* Vector4.cpp */,
 				AA4924FC1A5E231B00C75039 /* Vector3.h */,
 				AA4924FD1A5E231B00C75039 /* Vector3.cpp */,
-				AA94B4C01A5DD59B001E9E6F /* btBulletCollisionCommon.h */,
-				AA94B4C11A5DD59B001E9E6F /* btBulletDynamicsCommon.h */,
+			);
+			name = Helper;
+			sourceTree = "<group>";
+		};
+		AA4925291A5F4B9000C75039 /* SceneGraph */ = {
+			isa = PBXGroup;
+			children = (
+				AA49252A1A5F4BE400C75039 /* CubeG.cpp */,
+				AA49252B1A5F4BE400C75039 /* CubeG.h */,
+				AA49252C1A5F4BE400C75039 /* Sphere.cpp */,
+				AA49252D1A5F4BE400C75039 /* Sphere.h */,
+				AA49251D1A5F4B8D00C75039 /* MatrixTransform.cpp */,
+				AA49251E1A5F4B8D00C75039 /* MatrixTransform.h */,
+				AA49251F1A5F4B8D00C75039 /* Geode.cpp */,
+				AA4925201A5F4B8D00C75039 /* Geode.h */,
+				AA4925211A5F4B8D00C75039 /* Group.cpp */,
+				AA4925221A5F4B8D00C75039 /* Group.h */,
+				AA4925231A5F4B8D00C75039 /* Node.cpp */,
+				AA4925241A5F4B8D00C75039 /* Node.h */,
+			);
+			name = SceneGraph;
+			sourceTree = "<group>";
+		};
+		AA949CA91A5DBCD1001E9E6F = {
+			isa = PBXGroup;
+			children = (
+				AA4925331A5F59F000C75039 /* Ball.cpp */,
+				AA4925341A5F59F000C75039 /* Ball.h */,
+				AA4925301A5F50CA00C75039 /* Brick.cpp */,
+				AA4925311A5F50CA00C75039 /* Brick.h */,
+				AA4925291A5F4B9000C75039 /* SceneGraph */,
+				AA49251C1A5F4B4700C75039 /* Helper */,
+				AA4925091A5E24CB00C75039 /* cube.cpp */,
+				AA49250A1A5E24CB00C75039 /* cube.h */,
+				AA4925061A5E23B600C75039 /* Window.cpp */,
+				AA4925071A5E23B600C75039 /* Window.h */,
+				AA94A9D31A5DD302001E9E6F /* main.cpp */,
+				AA94A9D41A5DD302001E9E6F /* main.h */,
 				AA94B3361A5DD57E001E9E6F /* src */,
 				AA94A9D81A5DD45E001E9E6F /* GLUT.framework */,
 				AA94A9D61A5DD45A001E9E6F /* OpenGL.framework */,
@@ -1289,10 +1345,18 @@
 				AA4925021A5E232C00C75039 /* Camera.cpp in Sources */,
 				AA4925081A5E23B600C75039 /* Window.cpp in Sources */,
 				AA94A9D51A5DD302001E9E6F /* main.cpp in Sources */,
+				AA4925271A5F4B8D00C75039 /* Group.cpp in Sources */,
+				AA49252E1A5F4BE400C75039 /* CubeG.cpp in Sources */,
+				AA4925281A5F4B8D00C75039 /* Node.cpp in Sources */,
 				AA4924FF1A5E231B00C75039 /* Vector3.cpp in Sources */,
 				AA4924FE1A5E231B00C75039 /* Vector4.cpp in Sources */,
+				AA4925251A5F4B8D00C75039 /* MatrixTransform.cpp in Sources */,
+				AA4925351A5F59F000C75039 /* Ball.cpp in Sources */,
+				AA4925321A5F50CA00C75039 /* Brick.cpp in Sources */,
 				AA4925051A5E233F00C75039 /* Matrix4.cpp in Sources */,
+				AA49252F1A5F4BE400C75039 /* Sphere.cpp in Sources */,
 				AA49250B1A5E24CB00C75039 /* cube.cpp in Sources */,
+				AA4925261A5F4B8D00C75039 /* Geode.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

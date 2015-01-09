@@ -12,7 +12,7 @@ Camera::Camera(){
     d = new Vector3(0,0,0);
     up = new Vector3(0, 1, 0);
     //e = new Vector3(0, 400, 20); //it shows up
-    e = new Vector3(0,100,500);
+    e = new Vector3(0,10,20);
     //e = new Vector3(0, 100, 300);
     //e = new Vector3(0, 5, 2);
     //e= new Vector3(0,-2,2);

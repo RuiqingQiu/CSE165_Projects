@@ -15,6 +15,9 @@
 int Window::width  = 512;   // set window width in pixels here
 int Window::height = 512;   // set window height in pixels here
 Matrix4 Window::world = Matrix4();
+Brick Window::tmp = Brick(Vector3(0,1,0));
+vector<Brick> Window::b_list;
+
 
 //----------------------------------------------------------------------------
 // Callback method called by GLUT when graphics window is resized by the user
@@ -33,61 +36,24 @@ void Window::reshapeCallback(int w, int h)
 }
 void Window::displayCallback()
 {
+    clock_t startTime = clock();
+    //Globals::dynamicsWorld->stepSimulation(1 / 60.f, 10);
+
+    tmp.print_height();
+    
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // clear color and depth buffers
     glMatrixMode(GL_MODELVIEW);  // make sure we're in Modelview mode
     // Tell OpenGL what ModelView matrix to use:
     Matrix4 glmatrix;
-    glmatrix = Globals::cube.getMatrix();
-    glmatrix.transpose();
-    glLoadMatrixd(glmatrix.getPointer());
-    // Draw all six faces of the cube:
-    glBegin(GL_QUADS);
-    glColor3f(0.0, 1.0, 0.0);		// This makes the cube green; the parameters are for red, green and blue.
-        // To change the color of the other faces you will need to repeat this call before each face is drawn.
-        // Draw front face:
-        glNormal3f(0.0, 0.0, 1.0);
-        glVertex3f(-5.0,  5.0,  5.0);
-        glVertex3f( 5.0,  5.0,  5.0);
-        glVertex3f( 5.0, -5.0,  5.0);
-        glVertex3f(-5.0, -5.0,  5.0);
-        
-        // Draw left side:
-        glNormal3f(-1.0, 0.0, 0.0);
-        glVertex3f(-5.0,  5.0,  5.0);
-        glVertex3f(-5.0,  5.0, -5.0);
-        glVertex3f(-5.0, -5.0, -5.0);
-        glVertex3f(-5.0, -5.0,  5.0);
-        
-        // Draw right side:
-        glNormal3f(1.0, 0.0, 0.0);
-        glVertex3f( 5.0,  5.0,  5.0);
-        glVertex3f( 5.0,  5.0, -5.0);
-        glVertex3f( 5.0, -5.0, -5.0);
-        glVertex3f( 5.0, -5.0,  5.0);
-        
-        // Draw back face:
-        glNormal3f(0.0, 0.0, -1.0);
-        glVertex3f(-5.0,  5.0, -5.0);
-        glVertex3f( 5.0,  5.0, -5.0);
-        glVertex3f( 5.0, -5.0, -5.0);
-        glVertex3f(-5.0, -5.0, -5.0);
-        
-        // Draw top side:
-        glNormal3f(0.0, 1.0, 0.0);
-        glVertex3f(-5.0,  5.0,  5.0);
-        glVertex3f( 5.0,  5.0,  5.0);
-        glVertex3f( 5.0,  5.0, -5.0);
-        glVertex3f(-5.0,  5.0, -5.0);
-        
-        // Draw bottom side:
-        glNormal3f(0.0, -1.0, 0.0);
-        glVertex3f(-5.0, -5.0, -5.0);
-        glVertex3f( 5.0, -5.0, -5.0);
-        glVertex3f( 5.0, -5.0,  5.0);
-        glVertex3f(-5.0, -5.0,  5.0);
-    
-        glEnd();
     glmatrix.identity();
+    for(int i = 0; i < b_list.size(); i++){
+        b_list[i].draw(Globals::camera->getMatrix()*glmatrix);
+    }
+    //Globals::root.draw(Globals::camera->getMatrix()*glmatrix);
+
+    
+    glmatrix.identity();
+    glmatrix = Globals::camera->getMatrix();
     glmatrix.transpose();
     glLoadMatrixd(glmatrix.getPointer());
     glBegin(GL_QUADS);
@@ -102,6 +68,8 @@ void Window::displayCallback()
 
     glFlush();
     glutSwapBuffers();
+    clock_t endTime = clock();
+    cout << "frame rate: " << 1.0/(float((endTime - startTime))/CLOCKS_PER_SEC) << endl;
 }
 void Window::idleCallback()
 {
