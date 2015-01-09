@@ -14,11 +14,16 @@
 namespace Globals
 {
     Cube cube;
+    btDiscreteDynamicsWorld* dynamicsWorld;
+    btRigidBody* fallRigidBody;
+    Camera* camera;
+    MatrixTransform root;
 }
 
 int main (int argc, char *argv[])
 {
-    
+    srand (time(NULL));
+
     btBroadphaseInterface* broadphase = new btDbvtBroadphase();
     
     btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -26,61 +31,34 @@ int main (int argc, char *argv[])
     
     btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
     
-    btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+    Globals::dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
     
-    dynamicsWorld->setGravity(btVector3(0, -10, 0));
+    Globals::dynamicsWorld->setGravity(btVector3(0, -10, 0));
     
     
     btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 1);
     
     btCollisionShape* fallShape = new btSphereShape(1);
-    
+
     
     btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -1, 0)));
     btRigidBody::btRigidBodyConstructionInfo
     groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
     btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
-    dynamicsWorld->addRigidBody(groundRigidBody);
+    groundRigidBody->setRestitution(0);
+    Globals::dynamicsWorld->addRigidBody(groundRigidBody);
     
     
     btDefaultMotionState* fallMotionState =
-    new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 50, 0)));
+    new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 10, 0)));
     btScalar mass = 1;
     btVector3 fallInertia(0, 0, 0);
     fallShape->calculateLocalInertia(mass, fallInertia);
     btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallShape, fallInertia);
-    btRigidBody* fallRigidBody = new btRigidBody(fallRigidBodyCI);
-    dynamicsWorld->addRigidBody(fallRigidBody);
-    
-    
-    for (int i = 0; i < 300; i++) {
-        dynamicsWorld->stepSimulation(1 / 60.f, 10);
-        
-        btTransform trans;
-        fallRigidBody->getMotionState()->getWorldTransform(trans);
-        
-        std::cout << "sphere height: " << trans.getOrigin().getY() << std::endl;
-    }
-    
-    dynamicsWorld->removeRigidBody(fallRigidBody);
-    delete fallRigidBody->getMotionState();
-    delete fallRigidBody;
-    
-    dynamicsWorld->removeRigidBody(groundRigidBody);
-    delete groundRigidBody->getMotionState();
-    delete groundRigidBody;
-    
-    
-    delete fallShape;
-    
-    delete groundShape;
-    
-    
-    delete dynamicsWorld;
-    delete solver;
-    delete collisionConfiguration;
-    delete dispatcher;
-    delete broadphase;
+    Globals::fallRigidBody = new btRigidBody(fallRigidBodyCI);
+    Globals::fallRigidBody->setRestitution(0);
+    Globals::dynamicsWorld->addRigidBody(Globals::fallRigidBody);
+
     
     float specular[]  = {1.0, 1.0, 1.0, 1.0};
     float shininess[] = {100.0};
@@ -109,7 +87,7 @@ int main (int argc, char *argv[])
     // Generate light source:
     
     
-    float position[]  = {0.0, 10.0, 1.0, 0.0};	// lightsource position
+    float position[]  = {0.0, 10.0, 10.0, 0.0};	// lightsource position
     glLightfv(GL_LIGHT0, GL_POSITION, position);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -123,8 +101,61 @@ int main (int argc, char *argv[])
     glutKeyboardFunc(Window::processNormalKeys);
     Window::world.identity();
     Globals::cube.getMatrix().identity();
+    Globals::camera = new Camera();
+    Globals::camera->update();
+    Globals::root.isRoot = true;
+    
+    
+    int row_max = 10;
+    int col_max = 10;
+    
+    for(int i = 0; i < row_max; i++){
+        for(int j = 0; j < col_max; j++){
+            Brick b = Brick(Vector3(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX));
+            if(j % 2 == 0){
+                b.setLocation(-row_max+2*i + 0.5, j*2, 0);
+                b.physics(-row_max+2*i + 0.5, j*2, 0);
+            }
+            else{
+                b.setLocation(-row_max+2*i, j*2, 0);
+                b.physics(-row_max+2*i, j*2, 0);
+            }
+            Window::b_list.push_back(b);
+            Globals::root.addChild(b.world);
+        }
+    }
+    Window::tmp = Brick(Vector3(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX));
+    Window::tmp.setLocation(0, 10, 5);
+    Window::tmp.physics(0,10,5);
+    Globals::root.addChild(Window::tmp.world);
+
+    Ball b = Ball(Vector3(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX));
+    b.setLocation(0, col_max , 5);
+    Globals::root.addChild(b.world);
+
     glutMainLoop();
     
+    
+    //Delete all the physics objects
+    Globals::dynamicsWorld->removeRigidBody(Globals::fallRigidBody);
+    delete Globals::fallRigidBody->getMotionState();
+    delete Globals::fallRigidBody;
+    
+    Globals::dynamicsWorld->removeRigidBody(groundRigidBody);
+    delete groundRigidBody->getMotionState();
+    delete groundRigidBody;
+    
+    
+    delete fallShape;
+    
+    delete groundShape;
+    
+    
+    delete Globals::dynamicsWorld;
+    delete solver;
+    delete collisionConfiguration;
+    delete dispatcher;
+    delete broadphase;
     
     
     return 0;
