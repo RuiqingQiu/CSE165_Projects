@@ -11,6 +11,7 @@
 #include <iostream>
 #include <GLUT/glut.h>
 #include "btBulletDynamicsCommon.h"
+
 namespace Globals
 {
     Cube cube;
@@ -25,24 +26,22 @@ btCollisionDispatcher* dispatcher;
 btSequentialImpulseConstraintSolver* solver;
 btCollisionShape* groundShape;
 btRigidBody* groundRigidBody;
+
 void physics_setup(){
     broadphase = new btDbvtBroadphase();
     
     collisionConfiguration = new btDefaultCollisionConfiguration();
     dispatcher = new btCollisionDispatcher(collisionConfiguration);
     
-    //the actual solver
-    btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
+    solver = new btSequentialImpulseConstraintSolver;
     
     //the world
-    btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+    Globals::dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
     
-    dynamicsWorld->setGravity(btVector3(0, -10, 0));
-
-    btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 1);
+    Globals::dynamicsWorld->setGravity(btVector3(0, -10, 0));
     
-    btCollisionShape* fallShape = new btSphereShape(1);
-
+    
+    groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 1);
     
     btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -1, 0)));
     
@@ -54,16 +53,31 @@ void physics_setup(){
     groundRigidBody->setRestitution(0);
     Globals::dynamicsWorld->addRigidBody(groundRigidBody);
     
-    btDefaultMotionState* fallMotionState =
-    new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 10, 0)));
-    btScalar mass = 1;
-    btVector3 fallInertia(0, 0, 0);
-    fallShape->calculateLocalInertia(mass, fallInertia);
-    btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallShape, fallInertia);
-    Globals::fallRigidBody = new btRigidBody(fallRigidBodyCI);
-    Globals::fallRigidBody->setRestitution(0);
-    Globals::dynamicsWorld->addRigidBody(Globals::fallRigidBody);
+    
+    //    btDefaultMotionState* fallMotionState =
+    //    new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 10, 0)));
+    //    btScalar mass = 1;
+    //    btVector3 fallInertia(0, 0, 0);
+    //    fallShape->calculateLocalInertia(mass, fallInertia);
+    //    btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallShape, fallInertia);
+    //    Globals::fallRigidBody = new btRigidBody(fallRigidBodyCI);
+    //    Globals::fallRigidBody->setRestitution(0);
+    //    Globals::dynamicsWorld->addRigidBody(Globals::fallRigidBody);
+}
 
+void physics_cleanup(){
+    //Delete all the physics objects
+    Globals::dynamicsWorld->removeRigidBody(Globals::fallRigidBody);
+    delete Globals::fallRigidBody->getMotionState();
+    delete Globals::fallRigidBody;
+    
+    Globals::dynamicsWorld->removeRigidBody(groundRigidBody);
+    delete groundRigidBody->getMotionState();
+    delete groundRigidBody;
+    
+    
+    delete groundShape;
+    
     
     delete Globals::dynamicsWorld;
     delete solver;

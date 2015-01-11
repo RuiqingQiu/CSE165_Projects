@@ -18,6 +18,10 @@ Matrix4 Window::world = Matrix4();
 Ball Window::ball = Ball(Vector3(0,1,0));
 vector<Brick> Window::b_list;
 
+//for moving the camera
+double eye_x = 0;
+double eye_y = 15;
+double eye_z = 30;
 
 //----------------------------------------------------------------------------
 // Callback method called by GLUT when graphics window is resized by the user
@@ -44,7 +48,11 @@ void Window::displayCallback()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // clear color and depth buffers
     glMatrixMode(GL_MODELVIEW);  // make sure we're in Modelview mode
     // Tell OpenGL what ModelView matrix to use:
-    gluLookAt(0, 15, 30, 0, 0, 0, 0, 1, 0);
+    //gluLookAt(0, 15, 30, 0, 0, 0, 0, 1, 0);
+    gluLookAt(eye_x,eye_y,eye_z,
+              0, 0, 0,
+              0, 1, 0);
+
 
     glBegin(GL_QUADS);
     glColor3f(0.7, 1, 1);
@@ -95,6 +103,29 @@ void Window::processNormalKeys(unsigned char key, int x, int y){
         physics_setup();
         initWalls();
     }
+    //move the camera y up
+    else if(key == 'w'){
+        eye_y+=10;
+    }
+    //move the camer y down
+    else if(key == 's'){
+        eye_y-=10;
+    }
+    //move the camera x up
+    else if(key == 'd'){
+        eye_x+=10;
+    }
+    //move the camera x down
+    else if(key == 'a'){
+        eye_x-=10;
+    }
+    else if(key == 'q'){
+        eye_z-=10;
+    }
+    else if(key == 'e'){
+        eye_z+=10;
+    }
+
 }
 
 
