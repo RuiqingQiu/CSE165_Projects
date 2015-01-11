@@ -10,14 +10,18 @@
 #define __CSE165_HW1__Ball__
 
 #include <stdio.h>
-#include <stdio.h>
 #include "MatrixTransform.h"
 #include "Sphere.h"
+#include "main.h"
+
 class Ball{
 public:
+    btRigidBody* rb;
+    Vector3 m_color;
     MatrixTransform* world; //Position in the world
     Ball(Vector3 color);
     void draw(Matrix4 C);
     void setLocation(float x, float y, float z);
+    void physics(float x, float y, float z);
 };
 #endif /* defined(__CSE165_HW1__Ball__) */

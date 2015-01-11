@@ -13,11 +13,13 @@
 #include "MatrixTransform.h"
 #include "CubeG.h"
 #include "main.h"
+#include <GLUT/glut.h>
 
 class Brick{
 public:
     MatrixTransform* world; //Position in the world
     btRigidBody* rb;
+    Vector3 m_color;
     Brick(Vector3 color);
     void draw(Matrix4 C);
     void setLocation(float x, float y, float z);

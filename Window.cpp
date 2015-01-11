@@ -15,7 +15,7 @@
 int Window::width  = 512;   // set window width in pixels here
 int Window::height = 512;   // set window height in pixels here
 Matrix4 Window::world = Matrix4();
-Brick Window::tmp = Brick(Vector3(0,1,0));
+Ball Window::ball = Ball(Vector3(0,1,0));
 vector<Brick> Window::b_list;
 
 
@@ -37,33 +37,34 @@ void Window::reshapeCallback(int w, int h)
 void Window::displayCallback()
 {
     clock_t startTime = clock();
-    //Globals::dynamicsWorld->stepSimulation(1 / 60.f, 10);
-
-    tmp.print_height();
     
+    Globals::dynamicsWorld->stepSimulation(1 / 60.f, 10);
+
+    //tmp.print_height();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // clear color and depth buffers
     glMatrixMode(GL_MODELVIEW);  // make sure we're in Modelview mode
     // Tell OpenGL what ModelView matrix to use:
-    Matrix4 glmatrix;
-    glmatrix.identity();
-    for(int i = 0; i < b_list.size(); i++){
-        b_list[i].draw(Globals::camera->getMatrix()*glmatrix);
-    }
-    //Globals::root.draw(Globals::camera->getMatrix()*glmatrix);
+    gluLookAt(0, 15, 30, 0, 0, 0, 0, 1, 0);
 
-    
-    glmatrix.identity();
-    glmatrix = Globals::camera->getMatrix();
-    glmatrix.transpose();
-    glLoadMatrixd(glmatrix.getPointer());
     glBegin(GL_QUADS);
     glColor3f(0.7, 1, 1);
     glNormal3f(0, 1, 0);
-    glVertex3f(-100, -5, -100);
-    glVertex3f(100, -5, -100);
-    glVertex3f(100, -5, 100);
-    glVertex3f(-100, -5, 100);
+    glVertex3f(-100, -1, -100);
+    glVertex3f(100, -1, -100);
+    glVertex3f(100, -1, 100);
+    glVertex3f(-100, -1, 100);
     glEnd();
+    
+    Matrix4 glmatrix;
+    glmatrix.identity();
+    ball.draw(Globals::camera->getMatrix()*glmatrix);
+    for(int i = 0; i < b_list.size(); i++){
+        b_list[i].draw(glmatrix);
+    }
+    
+    glmatrix.identity();
+    glmatrix.transpose();
+    glLoadMatrixd(glmatrix.getPointer());
     
 
     glFlush();
@@ -88,6 +89,11 @@ void Window::processSpecialKeys(int key, int x, int y){
 void Window::processNormalKeys(unsigned char key, int x, int y){
     if (key == 27){
         exit(0);
+    }
+    else if(key == ' '){
+        //physics_cleanup();
+        physics_setup();
+        initWalls();
     }
 }
 

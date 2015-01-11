@@ -17,6 +17,7 @@ void Geode::setC(Matrix4 C){
 }
 void Geode::draw(Matrix4 C){
     glMatrixMode(GL_MODELVIEW);
+    //C.print("C is " );
     C.transpose();
     glLoadMatrixd(C.getPointer());
     C.transpose();
