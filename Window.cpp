@@ -17,6 +17,10 @@ int Window::height = 512;   // set window height in pixels here
 Matrix4 Window::world = Matrix4();
 Ball Window::ball = Ball(Vector3(0,1,0));
 vector<Brick> Window::b_list;
+int Movement;
+Vector3 lastPoint = Vector3(0, 0, 0);
+Vector3 lastPoint_z = Vector3(0, 0, 0);
+
 
 //for moving the camera
 double eye_x = 0;
@@ -49,11 +53,12 @@ void Window::displayCallback()
     glMatrixMode(GL_MODELVIEW);  // make sure we're in Modelview mode
     // Tell OpenGL what ModelView matrix to use:
     //gluLookAt(0, 15, 30, 0, 0, 0, 0, 1, 0);
-    gluLookAt(eye_x,eye_y,eye_z,
-              0, 0, 0,
-              0, 1, 0);
-
-
+    //gluLookAt(eye_x,eye_y,eye_z,0, 0, 0,0, 1, 0);
+    Matrix4 glmatrix;
+    glmatrix.identity();
+    glmatrix = Globals::camera->getMatrix() * world;
+    glmatrix.transpose();
+    glLoadMatrixd(glmatrix.getPointer());
     glBegin(GL_QUADS);
     glColor3f(0.7, 1, 1);
     glNormal3f(0, 1, 0);
@@ -63,16 +68,15 @@ void Window::displayCallback()
     glVertex3f(-100, -1, 100);
     glEnd();
     
-    Matrix4 glmatrix;
-    glmatrix.identity();
-    ball.draw(Globals::camera->getMatrix()*glmatrix);
+    ball.draw(Globals::camera->getMatrix()*glmatrix*world);
     for(int i = 0; i < b_list.size(); i++){
-        b_list[i].draw(glmatrix);
+        b_list[i].draw(Globals::camera->getMatrix()*glmatrix*world);
     }
     
     glmatrix.identity();
     glmatrix.transpose();
-    glLoadMatrixd(glmatrix.getPointer());
+    
+    //glLoadMatrixd(glmatrix.getPointer());
     
     glFlush();
     glutSwapBuffers();
@@ -101,30 +105,109 @@ void Window::processNormalKeys(unsigned char key, int x, int y){
         //physics_cleanup();
         physics_setup();
         initWalls();
+        Globals::camera->e->x = 0;
+        Globals::camera->e->y = 15;
+        Globals::camera->e->z = 30;
+        Globals::camera->update();
+        world.identity();
     }
     //move the camera y up
     else if(key == 'w'){
-        eye_y+=10;
+        Globals::camera->e->y+=10;
     }
     //move the camer y down
     else if(key == 's'){
-        eye_y-=10;
+        Globals::camera->e->y-=10;
     }
     //move the camera x up
     else if(key == 'd'){
-        eye_x+=10;
+        Globals::camera->e->x+=10;
     }
     //move the camera x down
     else if(key == 'a'){
-        eye_x-=10;
+        Globals::camera->e->x-=10;
     }
     else if(key == 'q'){
-        eye_z-=10;
+        Globals::camera->e->z-=10;
     }
     else if(key == 'e'){
-        eye_z+=10;
+        Globals::camera->e->z+=10;
     }
+    Globals::camera->update();
+}
 
+Vector3 Window::trackBallMapping(int x, int y){
+    Vector3 v = Vector3(0,0,0);
+    float d;
+    v.x = (2.0*x - width) / width;
+    v.y = (height - 2.0*y) / height;
+    v.z = 0.0;
+    d = v.length();
+    d = (d<1.0) ? d : 1.0;
+    v.z = sqrtf(1.001 - d*d);
+    v.normalize(); // Still need to normalize, since we only capped d, not v.
+    return v;
+}
+
+void Window::mouseMove(int x, int y){
+    Vector3 direction = Vector3(0, 0, 0);
+    float pixel_diff;
+    float rot_angle, zoom_factor;
+    Vector3 curPoint = Vector3(0,0,0);
+    lastPoint.print("last point is ");
+    switch (Movement) {
+        case 0:{
+            cout << "case 0" << endl;
+            curPoint = trackBallMapping(x, y);//Map the mouse position to a logical sphere location
+            direction = curPoint - lastPoint;
+            float velocity = direction.length();
+            if(velocity > 0.0001){
+                Vector3 rotAxis = lastPoint.cross(lastPoint, curPoint);
+                rot_angle = velocity * 100;
+                cout << "rot angle " << rot_angle << endl;
+                GLfloat objectXform[16];
+                glGetFloatv(GL_MODELVIEW_MATRIX, objectXform);
+                glLoadIdentity();
+                glRotatef(rot_angle, rotAxis.x, rotAxis.y, rotAxis.z);
+                glMultMatrixf(objectXform);
+                Matrix4 tmp = Matrix4();
+                tmp.makeRotate(rot_angle, rotAxis);
+                //Globals::bunny.getMatrix() = Globals::bunny.getMatrix() * tmp;
+                world = tmp * world;
+            }
+            break;
+        }
+        case 1:
+            cout << "case 1" << endl;
+            pixel_diff = y - lastPoint_z.y;
+            cout << "pixel diff " << pixel_diff << endl;
+            zoom_factor = 1.0 + pixel_diff/50;
+            cout << "zoom factor " << zoom_factor << endl;
+            Matrix4 tmp = Matrix4();
+            tmp.makeScale(zoom_factor, zoom_factor, zoom_factor);
+            world = world * tmp;
+            break;
+    }
+    lastPoint = curPoint;
+    lastPoint_z = Vector3(x, y, 0);
+}
+
+void Window::mouse(int button, int state, int x, int y)
+{
+    switch(button){
+            //Left-mouse button is being held down
+        case GLUT_LEFT_BUTTON:
+            Movement = 0;
+            break;
+        case GLUT_RIGHT_BUTTON:
+            Movement = 1;
+            break;
+    }
+    lastPoint = trackBallMapping(x, y);
+    lastPoint_z = Vector3(x, y, 0);
+    lastPoint.print("mouse");
+    
+    glMatrixMode(GL_MODELVIEW);
 }
 
 

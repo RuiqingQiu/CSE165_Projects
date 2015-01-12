@@ -28,7 +28,9 @@ public:
     static void processNormalKeys(unsigned char key, int x, int y);
     static void shadow_set_up();
     static int LoadGLTextures();
-    
+    static void mouse(int button, int state, int x, int y);
+    static void mouseMove(int x, int y);
+    static Vector3 trackBallMapping(int x, int y);
     static Ball ball;
     static vector<Brick> b_list;
     

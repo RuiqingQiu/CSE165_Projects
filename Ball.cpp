@@ -48,8 +48,9 @@ void Ball::physics(float x, float y, float z){
     //info.m_restitution = 1.3f;
     //info.m_friction = 1.5f;
     rb = new btRigidBody(info);
+    //rb->applyForce(btVector3(0,5,5), btVector3(x,y,z));
+    //rb->setAngularVelocity(btVector3(0,5,5));
     //rb->setLinearVelocity(btVector3(0,0,-5));
-    rb->applyCentralForce(btVector3(0,0,-500));
     Globals::dynamicsWorld->addRigidBody(rb);
 
 }
