@@ -11,6 +11,7 @@
 #include <iostream>
 #include <GLUT/glut.h>
 #include "btBulletDynamicsCommon.h"
+
 namespace Globals
 {
     Cube cube;
@@ -25,6 +26,7 @@ btCollisionDispatcher* dispatcher;
 btSequentialImpulseConstraintSolver* solver;
 btCollisionShape* groundShape;
 btRigidBody* groundRigidBody;
+
 void physics_setup(){
     broadphase = new btDbvtBroadphase();
     
@@ -33,6 +35,7 @@ void physics_setup(){
     
     solver = new btSequentialImpulseConstraintSolver;
     
+    //the world
     Globals::dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
     
     Globals::dynamicsWorld->setGravity(btVector3(0, -10, 0));
@@ -40,6 +43,7 @@ void physics_setup(){
     groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 1);
     
     btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -1, 0)));
+    
     btRigidBody::btRigidBodyConstructionInfo
     groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
     groundRigidBodyCI.m_friction = 1.5f;
@@ -77,6 +81,7 @@ void physics_setup(){
     //    Globals::fallRigidBody->setRestitution(0);
     //    Globals::dynamicsWorld->addRigidBody(Globals::fallRigidBody);
 }
+
 void physics_cleanup(){
     //Delete all the physics objects
     Globals::dynamicsWorld->removeRigidBody(Globals::fallRigidBody);
