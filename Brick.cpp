@@ -9,9 +9,9 @@
 #include "Brick.h"
 Brick::Brick(Vector3 color){
     world = new MatrixTransform();
-    CubeG* piece = new CubeG();
-    piece->updateColor(color);
-    world->addChild(piece);
+    //CubeG* piece = new CubeG();
+    //piece->updateColor(color);
+    //world->addChild(piece);
     m_color = color;
 }
 void Brick::draw(Matrix4 C){

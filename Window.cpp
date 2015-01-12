@@ -66,7 +66,6 @@ void Window::displayCallback()
     glmatrix.transpose();
     glLoadMatrixd(glmatrix.getPointer());
     
-
     glFlush();
     glutSwapBuffers();
     clock_t endTime = clock();

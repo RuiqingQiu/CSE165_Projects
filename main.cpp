@@ -37,7 +37,6 @@ void physics_setup(){
     
     Globals::dynamicsWorld->setGravity(btVector3(0, -10, 0));
     
-    
     groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 1);
     
     btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -1, 0)));
@@ -48,6 +47,24 @@ void physics_setup(){
     groundRigidBody = new btRigidBody(groundRigidBodyCI);
     groundRigidBody->setRestitution(0);
     Globals::dynamicsWorld->addRigidBody(groundRigidBody);
+    
+    
+    
+    
+//    trans.setIdentity();
+//    trans.setOrigin(btVector3(1,30,-5));
+//    localCreateRigidBody( mass,trans,shape);
+//    trans.setOrigin(btVector3(0,0,-5));
+//    
+//    btRigidBody* body0 = localCreateRigidBody( mass,trans,shape);
+//    trans.setOrigin(btVector3(2*CUBE_HALF_EXTENTS,20,0));
+//    mass = 1.f;
+//    //	btRigidBody* body1 = 0;//localCreateRigidBody( mass,trans,shape);
+//    btVector3 pivotInA(CUBE_HALF_EXTENTS,CUBE_HALF_EXTENTS,0);
+//    btTypedConstraint* p2p = new btPoint2PointConstraint(*body0,pivotInA);
+//    m_dynamicsWorld->addConstraint(p2p);
+//    p2p ->setBreakingImpulseThreshold(10.2);
+//    p2p->setDbgDrawSize(btScalar(5.f));
     
     
     //    btDefaultMotionState* fallMotionState =
@@ -131,10 +148,10 @@ int main (int argc, char *argv[])
     Globals::camera->update();
     Globals::root.isRoot = true;
     
+    //Init the wall
     initWalls();
-
-
     glutMainLoop();
+    //delete everything used by the physics engine
     physics_cleanup();
     
     
@@ -161,6 +178,6 @@ void initWalls(){
         }
     }
     Window::ball = Ball(Vector3(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX));
-    Window::ball.setLocation(0, 20, 0);
-    Window::ball.physics(0,20,0);
+    Window::ball.setLocation(0, 20, 10);
+    Window::ball.physics(0,20,10);
 }
