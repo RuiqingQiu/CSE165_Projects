@@ -72,7 +72,7 @@ void Window::displayCallback()
     for(int i = 0; i < b_list.size(); i++){
         b_list[i].draw(Globals::camera->getMatrix()*glmatrix*world);
     }
-    
+    Globals::dynamicsWorld->debugDrawWorld();
     glmatrix.identity();
     glmatrix.transpose();
     

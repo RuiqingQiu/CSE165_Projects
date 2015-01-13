@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		AA0C6B581A5DD5F300DE2445 /* BulletDynamics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA94B4531A5DD57F001E9E6F /* BulletDynamics.framework */; };
+		AA0ED8B21A649A1000232147 /* GLDebugDrawer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA0ED8B11A649A1000232147 /* GLDebugDrawer.cpp */; };
+		AA0ED8D41A649A7100232147 /* GLDebugFont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA0ED8CA1A649A7100232147 /* GLDebugFont.cpp */; };
 		AA4924E51A5DD61500C75039 /* LinearMath.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA94B4BD1A5DD57F001E9E6F /* LinearMath.framework */; };
 		AA4924FE1A5E231B00C75039 /* Vector4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA4924FB1A5E231B00C75039 /* Vector4.cpp */; };
 		AA4924FF1A5E231B00C75039 /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA4924FD1A5E231B00C75039 /* Vector3.cpp */; };
@@ -42,6 +44,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		AA0ED8B01A649A0B00232147 /* GLDebugDrawer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLDebugDrawer.h; sourceTree = "<group>"; };
+		AA0ED8B11A649A1000232147 /* GLDebugDrawer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GLDebugDrawer.cpp; sourceTree = "<group>"; };
+		AA0ED8CA1A649A7100232147 /* GLDebugFont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GLDebugFont.cpp; sourceTree = "<group>"; };
+		AA0ED8DE1A649A7900232147 /* GLDebugFont.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLDebugFont.h; sourceTree = "<group>"; };
 		AA4924FA1A5E231B00C75039 /* Vector4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Vector4.h; sourceTree = "<group>"; };
 		AA4924FB1A5E231B00C75039 /* Vector4.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Vector4.cpp; sourceTree = "<group>"; };
 		AA4924FC1A5E231B00C75039 /* Vector3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Vector3.h; sourceTree = "<group>"; };
@@ -473,6 +479,10 @@
 		AA949CA91A5DBCD1001E9E6F = {
 			isa = PBXGroup;
 			children = (
+				AA0ED8DE1A649A7900232147 /* GLDebugFont.h */,
+				AA0ED8CA1A649A7100232147 /* GLDebugFont.cpp */,
+				AA0ED8B11A649A1000232147 /* GLDebugDrawer.cpp */,
+				AA0ED8B01A649A0B00232147 /* GLDebugDrawer.h */,
 				AA4925331A5F59F000C75039 /* Ball.cpp */,
 				AA4925341A5F59F000C75039 /* Ball.h */,
 				AA4925301A5F50CA00C75039 /* Brick.cpp */,
@@ -1343,7 +1353,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA4925021A5E232C00C75039 /* Camera.cpp in Sources */,
+				AA0ED8B21A649A1000232147 /* GLDebugDrawer.cpp in Sources */,
 				AA4925081A5E23B600C75039 /* Window.cpp in Sources */,
+				AA0ED8D41A649A7100232147 /* GLDebugFont.cpp in Sources */,
 				AA94A9D51A5DD302001E9E6F /* main.cpp in Sources */,
 				AA4925271A5F4B8D00C75039 /* Group.cpp in Sources */,
 				AA49252E1A5F4BE400C75039 /* CubeG.cpp in Sources */,

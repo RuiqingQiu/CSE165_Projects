@@ -11,7 +11,7 @@
 #include <iostream>
 #include <GLUT/glut.h>
 #include "btBulletDynamicsCommon.h"
-
+#include "GLDebugDrawer.h"
 namespace Globals
 {
     Cube cube;
@@ -40,6 +40,8 @@ void physics_setup(){
     
     Globals::dynamicsWorld->setGravity(btVector3(0, -10, 0));
     
+    Globals::dynamicsWorld->setDebugDrawer(new GLDebugDrawer());
+    Globals::dynamicsWorld->getDebugDrawer()->setDebugMode(1);
     groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 1);
     
     btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -1, 0)));
