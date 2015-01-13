@@ -39,7 +39,7 @@ void Ball::physics(float x, float y, float z){
     btSphereShape* sphereShape = new btSphereShape(1);
     //btCylinderShape* box = new btCylinderShape(btVector3(0.2f,0.2f,0.2f));
     btVector3 inertia;
-    float mass = 100.0f;
+    float mass = 10.0f;
     sphereShape->calculateLocalInertia(mass,inertia);
     
     btDefaultMotionState* MotionState =

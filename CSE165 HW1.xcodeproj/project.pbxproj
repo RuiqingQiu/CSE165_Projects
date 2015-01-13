@@ -10,6 +10,7 @@
 		AA0C6B581A5DD5F300DE2445 /* BulletDynamics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA94B4531A5DD57F001E9E6F /* BulletDynamics.framework */; };
 		AA0ED8B21A649A1000232147 /* GLDebugDrawer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA0ED8B11A649A1000232147 /* GLDebugDrawer.cpp */; };
 		AA0ED8D41A649A7100232147 /* GLDebugFont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA0ED8CA1A649A7100232147 /* GLDebugFont.cpp */; };
+		AA0ED8E71A649CCA00232147 /* BulletSoftBody.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA94B48A1A5DD57F001E9E6F /* BulletSoftBody.framework */; };
 		AA4924E51A5DD61500C75039 /* LinearMath.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA94B4BD1A5DD57F001E9E6F /* LinearMath.framework */; };
 		AA4924FE1A5E231B00C75039 /* Vector4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA4924FB1A5E231B00C75039 /* Vector4.cpp */; };
 		AA4924FF1A5E231B00C75039 /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA4924FD1A5E231B00C75039 /* Vector3.cpp */; };
@@ -429,6 +430,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA0ED8E71A649CCA00232147 /* BulletSoftBody.framework in Frameworks */,
 				AA4924E51A5DD61500C75039 /* LinearMath.framework in Frameworks */,
 				AA0C6B581A5DD5F300DE2445 /* BulletDynamics.framework in Frameworks */,
 				AA94B4C21A5DD5D1001E9E6F /* BulletCollision.framework in Frameworks */,
@@ -1457,6 +1459,7 @@
 					"$(PROJECT_DIR)/src/BulletCollision",
 					"$(PROJECT_DIR)/src/BulletDynamics",
 					"$(PROJECT_DIR)/src/LinearMath",
+					"$(PROJECT_DIR)/src/BulletSoftBody",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1470,6 +1473,7 @@
 					"$(PROJECT_DIR)/src/BulletCollision",
 					"$(PROJECT_DIR)/src/BulletDynamics",
 					"$(PROJECT_DIR)/src/LinearMath",
+					"$(PROJECT_DIR)/src/BulletSoftBody",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

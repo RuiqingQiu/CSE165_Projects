@@ -16,6 +16,9 @@
 #include <vector>
 #include "MatrixTransform.h"
 #include "Ball.h"
+#include "BulletSoftBody/btSoftBodyHelpers.h"
+#include "BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h"
+#include "BulletSoftBody/btSoftRigidDynamicsWorld.h"
 
 namespace Globals
 {
@@ -24,10 +27,14 @@ namespace Globals
     extern btRigidBody* fallRigidBody;
     extern Camera* camera;
     extern MatrixTransform root;
+    extern btSoftRigidDynamicsWorld* softworld;
+    extern btSoftBodyWorldInfo	m_softBodyWorldInfo;
+
 };
 void physics_setup();
 void physics_cleanup();
 void initWalls();
-
+btRigidBody* localCreateRigidBody(float mass, const btTransform& startTransform,btCollisionShape* shape);
+btRigidBody* createSphere(float rad, float x, float y, float z, float mass);
 
 #endif /* defined(__CSE165_HW1__main__) */

@@ -47,7 +47,7 @@ void Window::displayCallback()
     clock_t startTime = clock();
     
     Globals::dynamicsWorld->stepSimulation(1 / 60.f, 10);
-
+    //Globals::softworld->stepSimulation(1.0f/60.f,0);
     //tmp.print_height();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // clear color and depth buffers
     glMatrixMode(GL_MODELVIEW);  // make sure we're in Modelview mode
@@ -73,6 +73,7 @@ void Window::displayCallback()
         b_list[i].draw(Globals::camera->getMatrix()*glmatrix*world);
     }
     Globals::dynamicsWorld->debugDrawWorld();
+    //Globals::softworld->debugDrawWorld();
     glmatrix.identity();
     glmatrix.transpose();
     

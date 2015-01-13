@@ -19,6 +19,8 @@ namespace Globals
     btRigidBody* fallRigidBody;
     Camera* camera;
     MatrixTransform root;
+    btSoftRigidDynamicsWorld* softworld;
+    btSoftBodyWorldInfo	m_softBodyWorldInfo;
 }
 btBroadphaseInterface* broadphase;
 btDefaultCollisionConfiguration* collisionConfiguration;
@@ -36,10 +38,23 @@ void physics_setup(){
     solver = new btSequentialImpulseConstraintSolver;
     
     //the world
-    Globals::dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+    ///register some softbody collision algorithms on top of the default btDefaultCollisionConfiguration
+    btSoftBodyRigidBodyCollisionConfiguration *m_collisionConfiguration = new btSoftBodyRigidBodyCollisionConfiguration();
     
+    btCollisionDispatcher *m_dispatcher = new	btCollisionDispatcher(m_collisionConfiguration);
+    Globals::m_softBodyWorldInfo.m_dispatcher = m_dispatcher;
+    Globals::m_softBodyWorldInfo.m_broadphase = broadphase;
+    Globals::m_softBodyWorldInfo.m_gravity.setValue(0,-10,0);
+    Globals::m_softBodyWorldInfo.m_sparsesdf.Initialize();
+    
+    btConstraintSolver*	m_solver = new btSequentialImpulseConstraintSolver;
+    Globals::softworld = new btSoftRigidDynamicsWorld(m_dispatcher,broadphase,m_solver,m_collisionConfiguration);
+    Globals::softworld->setGravity(btVector3(0, -10, 0));
+    Globals::softworld->setDebugDrawer(new GLDebugDrawer());
+    Globals::softworld->getDebugDrawer()->setDebugMode(1);
+    Globals::dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
+    //Globals::dynamicsWorld =new btSoftRigidDynamicsWorld(m_dispatcher,broadphase,solver,m_collisionConfiguration);
     Globals::dynamicsWorld->setGravity(btVector3(0, -10, 0));
-    
     Globals::dynamicsWorld->setDebugDrawer(new GLDebugDrawer());
     Globals::dynamicsWorld->getDebugDrawer()->setDebugMode(1);
     groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 1);
@@ -53,9 +68,27 @@ void physics_setup(){
     groundRigidBody = new btRigidBody(groundRigidBodyCI);
     groundRigidBody->setRestitution(0);
     Globals::dynamicsWorld->addRigidBody(groundRigidBody);
+ 
+
+    //TRACEDEMO
+//    const int n=15;
+//    for(int i=0;i<n;++i)
+//    {
+//        btSoftBody* psb=btSoftBodyHelpers::CreateRope(Globals::m_softBodyWorldInfo,
+//                                                      btVector3(-10,0,i*0.25+10),
+//                                                      btVector3(10,0,i*0.25+10),
+//                                                      16,
+//                                                      1+2);
+//        psb->m_cfg.piterations		=	4;
+//        psb->m_materials[0]->m_kLST	=	0.1+(i/(btScalar)(n-1))*0.9;
+//        psb->setTotalMass(20);
+//        Globals::softworld->addSoftBody(psb);
+//    }
+
     
     
     
+
     
 //    trans.setIdentity();
 //    trans.setOrigin(btVector3(1,30,-5));
@@ -82,6 +115,57 @@ void physics_setup(){
     //    Globals::fallRigidBody = new btRigidBody(fallRigidBodyCI);
     //    Globals::fallRigidBody->setRestitution(0);
     //    Globals::dynamicsWorld->addRigidBody(Globals::fallRigidBody);
+}
+
+btRigidBody* createSphere(float rad, float x, float y, float z, float mass)
+
+{
+    
+    btTransform t2;
+    
+    t2.setIdentity();
+    
+    t2.setOrigin(btVector3(x,y,z));
+    
+    //btBoxShape* sphere2 = new btBoxShape(btVector3(1,1,1));//rad
+    btSphereShape* sphere2 = new btSphereShape(rad);//rad
+
+    btVector3 inertia(0,0,0);
+    
+    sphere2->calculateLocalInertia(mass, inertia);
+    
+    btMotionState* motion2 = new btDefaultMotionState(t2);
+    
+    btRigidBody::btRigidBodyConstructionInfo info2(mass, motion2, sphere2,inertia);//mass
+    
+    //    btStaticPlaneShape* sphere2 = new btStaticPlaneShape(btVector3(0,1,0),0);
+    
+    //    btMotionState* motion2 = new btDefaultMotionState(t);
+    
+    //    btRigidBody::btRigidBodyConstructionInfo info2(0.0, motion2, sphere2);
+    
+    info2.m_restitution = 0.5;
+    
+    btRigidBody* sphere = new btRigidBody(info2);
+    
+    //sphere-
+    
+    //m_sphere = sphere;
+    
+    Globals::dynamicsWorld->addRigidBody(sphere);
+    
+    //sphere->applyImpulse(btVector3(0.1,0,0), btVector3(0,0,0));
+    
+    
+    
+    
+    
+    //bodies.push_back(sphere);
+    
+    
+    
+    return sphere;
+    
 }
 
 void physics_cleanup(){
@@ -187,7 +271,110 @@ void initWalls(){
             Window::b_list.push_back(b);
         }
     }
+    
+    btRigidBody* s1 = createSphere(0.2, 0, 25, 10, 0);
+    btRigidBody* s2 = nullptr;
+    for(int i = 0; i < 20; i++){
+        
+        s2 = createSphere(0.2, 0, 25-0.4*i, 10, 1);
+        
+        btGeneric6DofConstraint * joint6DOF;
+        
+        btTransform localA, localB, toground;
+        
+        bool useLinearReferenceFrameA = true;
+        
+        
+        
+        localA.setIdentity(); localB.setIdentity();
+        
+        
+        
+        localA.setOrigin(btVector3(0,-0.2,0));
+        
+        
+        
+        localB.setOrigin(btVector3(0,0.2,0));
+        
+        
+        
+        //toground.setOrigin(btVector3(0,-20,-5));
+        
+        
+        
+        joint6DOF = new btGeneric6DofConstraint(*s1, *s2, localA, localB,useLinearReferenceFrameA);
+        
+        
+        
+        Globals::dynamicsWorld->addConstraint(joint6DOF);
+        s1 = s2;
+    }
+    
     Window::ball = Ball(Vector3(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX));
-    Window::ball.setLocation(0, 20, 0);
-    Window::ball.physics(0,20,0);
+    Window::ball.setLocation(0, 10, 10);
+    Window::ball.physics(0,10,10);
+    
+    btGeneric6DofConstraint * joint6DOF;
+    
+    btTransform localA, localB, toground;
+    
+    bool useLinearReferenceFrameA = true;
+    
+    
+    
+    localA.setIdentity(); localB.setIdentity();
+    
+    
+    
+    localA.setOrigin(btVector3(0,-0.2,0));
+    
+    
+    
+    localB.setOrigin(btVector3(0,1,0));
+    
+    
+    
+    //toground.setOrigin(btVector3(0,-20,-5));
+    
+    
+    
+    joint6DOF = new btGeneric6DofConstraint(*s2, *Window::ball.rb, localA, localB,useLinearReferenceFrameA);
+    
+    
+    
+    Globals::dynamicsWorld->addConstraint(joint6DOF);
+    
+    
+}
+
+btRigidBody* localCreateRigidBody(float mass, const btTransform& startTransform,btCollisionShape* shape)
+{
+    btAssert((!shape || shape->getShapeType() != INVALID_SHAPE_PROXYTYPE));
+    
+    //rigidbody is dynamic if and only if mass is non zero, otherwise static
+    bool isDynamic = (mass != 0.f);
+    
+    btVector3 localInertia(0,0,0);
+    if (isDynamic)
+        shape->calculateLocalInertia(mass,localInertia);
+    
+    //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+    
+#define USE_MOTIONSTATE 1
+#ifdef USE_MOTIONSTATE
+    btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+    
+    btRigidBody::btRigidBodyConstructionInfo cInfo(mass,myMotionState,shape,localInertia);
+    
+    btRigidBody* body = new btRigidBody(cInfo);
+    //body->setContactProcessingThreshold(m_defaultContactProcessingThreshold);
+    
+#else
+    btRigidBody* body = new btRigidBody(mass,0,shape,localInertia);
+    body->setWorldTransform(startTransform);
+#endif//
+    
+    Globals::dynamicsWorld->addRigidBody(body);
+    
+    return body;
 }
