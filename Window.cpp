@@ -64,10 +64,10 @@ void Window::displayCallback()
     glBegin(GL_QUADS);
     glColor3f(0.7, 1, 1);
     glNormal3f(0, 1, 0);
-    glVertex3f(-100, -1, -100);
-    glVertex3f(100, -1, -100);
-    glVertex3f(100, -1, 100);
-    glVertex3f(-100, -1, 100);
+    glVertex3f(-1000, -1, -1000);
+    glVertex3f(1000, -1, -1000);
+    glVertex3f(1000, -1, 1000);
+    glVertex3f(-1000, -1, 1000);
     glEnd();
     for(int i = 0; i < bodies.size();i++){
         if (bodies[i]->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
@@ -79,7 +79,7 @@ void Window::displayCallback()
         if (bodies[i]->getCollisionShape()->getShapeType() == STATIC_PLANE_PROXYTYPE) {
             
             renderPlane(bodies[i]);
-            
+            cout << "render plane" << endl;
         }
         
         if (bodies[i]->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
@@ -106,7 +106,7 @@ void Window::displayCallback()
     glFlush();
     glutSwapBuffers();
     clock_t endTime = clock();
-    cout << "frame rate: " << 1.0/(float((endTime - startTime))/CLOCKS_PER_SEC) << endl;
+    //cout << "frame rate: " << 1.0/(float((endTime - startTime))/CLOCKS_PER_SEC) << endl;
 }
 void Window::idleCallback()
 {
@@ -158,6 +158,9 @@ void Window::processNormalKeys(unsigned char key, int x, int y){
     else if(key == 'e'){
         Globals::camera->e->z+=10;
     }
+    else if (key == 'h'){
+        Window::ball.rb->applyCentralImpulse(btVector3(0,0,100));
+    }
     Globals::camera->update();
 }
 
@@ -173,6 +176,7 @@ Vector3 Window::trackBallMapping(int x, int y){
     v.normalize(); // Still need to normalize, since we only capped d, not v.
     return v;
 }
+float force = 0.0;
 
 void Window::mouseMove(int x, int y){
     Vector3 direction = Vector3(0, 0, 0);
@@ -203,20 +207,62 @@ void Window::mouseMove(int x, int y){
             break;
         }
         case 1:
-            cout << "case 1" << endl;
-            pixel_diff = y - lastPoint_z.y;
-            cout << "pixel diff " << pixel_diff << endl;
-            zoom_factor = 1.0 + pixel_diff/50;
-            cout << "zoom factor " << zoom_factor << endl;
-            Matrix4 tmp = Matrix4();
-            tmp.makeScale(zoom_factor, zoom_factor, zoom_factor);
-            world = world * tmp;
+            //cout << "case 1, right mouse button" << endl;
+            pixel_diff =y - lastPoint_z.y;
+            //cout << "pixel diff " << pixel_diff << endl;
+            force = 100*pixel_diff;
             break;
+        /* Zoom on mouse right button */
+//        case 1:
+//            cout << "case 1" << endl;
+//            pixel_diff = y - lastPoint_z.y;
+//            cout << "pixel diff " << pixel_diff << endl;
+//            zoom_factor = 1.0 + pixel_diff/50;
+//            cout << "zoom factor " << zoom_factor << endl;
+//            Matrix4 tmp = Matrix4();
+//            tmp.makeScale(zoom_factor, zoom_factor, zoom_factor);
+//            world = world * tmp;
+//            break;
     }
     lastPoint = curPoint;
     lastPoint_z = Vector3(x, y, 0);
 }
+Vector3 GetPickRay(float mouse_x, float mouse_y)
+{
+//    Matrix4 tmp1 = Matrix4(
+//                          Vector4(13,8,1,50),
+//                          Vector4(20,29,2,25),
+//                          Vector4(1,30,3,15),
+//                          Vector4(-3,1,4,10)
+//    );
+//    tmp1.Inverse().print("inverse is ");
+    float x = (2.0f * mouse_x) / Window::width - 1.0f;
+    float y = 1.0f - (2.0f * mouse_y) / Window::height;
+    float z = 1.0f;
+    Vector3 ray_nds = Vector3 (x, y, z);
+    Vector4 ray_clip = Vector4 (ray_nds.x,ray_nds.y, -1.0, 1.0);
+    GLfloat model[16];
+    glGetFloatv(GL_PROJECTION_MATRIX, model);
+    Matrix4 projection_matrix = Matrix4(Vector4(model[0],model[4],model[8],model[12]),
+                                        Vector4(model[1],model[5],model[9],model[13]),
+                                        Vector4(model[2],model[6],model[10],model[14]),
+                                        Vector4(model[3],model[7],model[11],model[15]));
+    Vector4 ray_eye = projection_matrix.Inverse() * ray_clip;
+    
+    ray_eye = Vector4 (ray_eye.get_x(),ray_eye.get_y(), -1.0, 0.0);
+    glGetFloatv(GL_MODELVIEW_MATRIX, model);
+    Matrix4 view_matrix = Matrix4(Vector4(model[0],model[4],model[8],model[12]),
+                                        Vector4(model[1],model[5],model[9],model[13]),
+                                        Vector4(model[2],model[6],model[10],model[14]),
+                                        Vector4(model[3],model[7],model[11],model[15]));
+    Vector4 tmp = view_matrix.Inverse() * ray_eye;
+    Vector3 ray_wor = Vector3(tmp.get_x(),tmp.get_y(),tmp.get_z());
 
+    // don't forget to normalise the vector at some point
+    ray_wor.normalize();
+    ray_wor.print("ray world position");
+    return ray_wor;
+}
 void Window::mouse(int button, int state, int x, int y)
 {
     switch(button){
@@ -227,13 +273,37 @@ void Window::mouse(int button, int state, int x, int y)
         case GLUT_RIGHT_BUTTON:
             Movement = 1;
             break;
+            
     }
     lastPoint = trackBallMapping(x, y);
     lastPoint_z = Vector3(x, y, 0);
     lastPoint.print("mouse");
     
     glMatrixMode(GL_MODELVIEW);
+    Vector3 m_rayTo = GetPickRay(x, y);
+    btVector3 btRayTo = btVector3(m_rayTo.x, m_rayTo.y, m_rayTo.z);
+    
+    btVector3 End = btRayTo;
+    btVector3 Start = btVector3(Globals::camera->e->x,Globals::camera->e->y,Globals::camera->e->z) ;
+    btVector3 Normal;
+    btCollisionWorld::ClosestRayResultCallback RayCallback(Start, End);
+
+    Globals::dynamicsWorld->rayTest(Start, End, RayCallback);
+    // Perform raycast
+    
+    if(RayCallback.hasHit()) {
+        End = RayCallback.m_hitPointWorld;
+        Normal = RayCallback.m_hitNormalWorld;
+        // Do some clever stuff here
+        cout << "hit" << endl;
+    }
+    else{
+        cout << "not hit" << endl;
+    }
 }
+
+
+
 
 void Window::renderPlane(btRigidBody* body)
 {

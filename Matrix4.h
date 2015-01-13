@@ -14,6 +14,7 @@ class Matrix4
     Matrix4(double);
     Matrix4(Vector3, Vector3, Vector3, Vector3);
     Matrix4& operator=(const Matrix4&);
+    Matrix4(Vector4 x, Vector4 y, Vector4 z, Vector4 e);
     double* getPointer(); 
     void identity(); 
     void transpose();
@@ -30,6 +31,8 @@ class Matrix4
     void makeTranslate(double tx, double ty, double tz);// make a translation matrix
     void print(string comment);// print the matrix (display all 16 matrix components numerically on the screen in a 4x4 array)
     Matrix4 inverseMatrix4x4(const float *m);
+    Matrix4 Inverse();
+
 };
 
 #endif

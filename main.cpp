@@ -69,6 +69,7 @@ void physics_setup(){
     groundRigidBody = new btRigidBody(groundRigidBodyCI);
     groundRigidBody->setRestitution(0);
     Globals::dynamicsWorld->addRigidBody(groundRigidBody);
+    //Window::bodies.push_back(groundRigidBody);
  
 
     //TRACEDEMO
@@ -239,8 +240,8 @@ int main (int argc, char *argv[])
     Globals::cube.getMatrix().identity();
     Globals::camera = new Camera();
     Globals::camera->e->x = 0;
-    Globals::camera->e->y = 15;
-    Globals::camera->e->z = 30;
+    Globals::camera->e->y = 0;
+    Globals::camera->e->z = 10;
     Globals::camera->update();
     Globals::root.isRoot = true;
     //Init the wall
@@ -254,6 +255,7 @@ int main (int argc, char *argv[])
 }
 void initWalls(){
     Window::b_list.clear();
+    Window::bodies.clear();
 
     int row_max = 10;
     int col_max = 10;
@@ -343,7 +345,6 @@ void initWalls(){
     
     
     localB.setOrigin(btVector3(0,1,0));
-    
     
     
     //toground.setOrigin(btVector3(0,-20,-5));
