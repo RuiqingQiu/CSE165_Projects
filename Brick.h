@@ -21,9 +21,9 @@ public:
     btRigidBody* rb;
     Vector3 m_color;
     Brick(Vector3 color);
-    void draw(Matrix4 C);
+    void draw(Matrix4 C, float length);
     void setLocation(float x, float y, float z);
-    void physics(float x, float y, float z);
+    void physics(float x, float y, float z, float length, float m_mass);
     void print_height();
 };
 #endif /* defined(__CSE165_HW1__Brick__) */

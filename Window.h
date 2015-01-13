@@ -10,7 +10,7 @@
 #define __CSE167_Final_Project__Window__
 
 #include <stdio.h>
-#include <GLUT/GLUT.h>
+#include <GLUT/glut.h>
 #include "Matrix4.h"
 #include "CubeG.h"
 #include "main.h"
@@ -33,6 +33,12 @@ public:
     static Vector3 trackBallMapping(int x, int y);
     static Ball ball;
     static vector<Brick> b_list;
-    
+    static vector<Brick> rope_list;
+    static vector<btRigidBody*> bodies;
+    static void renderSphere(btRigidBody* body);
+
+    static void renderPlane(btRigidBody* body);
+    static void renderCube(btRigidBody* body);
+
 };
 #endif /* defined(__CSE167_Final_Project__Window__) */

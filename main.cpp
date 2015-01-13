@@ -21,6 +21,7 @@ namespace Globals
     MatrixTransform root;
     btSoftRigidDynamicsWorld* softworld;
     btSoftBodyWorldInfo	m_softBodyWorldInfo;
+    vector<btRigidBody*> bodies;
 }
 btBroadphaseInterface* broadphase;
 btDefaultCollisionConfiguration* collisionConfiguration;
@@ -127,7 +128,7 @@ btRigidBody* createSphere(float rad, float x, float y, float z, float mass)
     
     t2.setOrigin(btVector3(x,y,z));
     
-    //btBoxShape* sphere2 = new btBoxShape(btVector3(1,1,1));//rad
+    //btBoxShape* sphere2 = new btBoxShape(btVector3(rad,rad,rad));//rad
     btSphereShape* sphere2 = new btSphereShape(rad);//rad
 
     btVector3 inertia(0,0,0);
@@ -262,22 +263,31 @@ void initWalls(){
             Brick b = Brick(Vector3(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX));
             if(j % 2 == 0){
                 b.setLocation(-row_max+2*i + 0.5, j*2, 0);
-                b.physics(-row_max+2*i + 0.5, j*2, 0);
+                b.physics(-row_max+2*i + 0.5, j*2, 0, 2,1);
             }
             else{
                 b.setLocation(-row_max+2*i, j*2, 0);
-                b.physics(-row_max+2*i, j*2, 0);
+                b.physics(-row_max+2*i, j*2, 0, 2,1);
             }
             Window::b_list.push_back(b);
         }
     }
     
     btRigidBody* s1 = createSphere(0.2, 0, 25, 10, 0);
+    Window::bodies.push_back(s1);
+//    Brick b = Brick(Vector3(1,1,0));
+//    b.setLocation(0, 25, 10);
+//    b.physics(0, 25, 10,0.2,0);
+//    Window::rope_list.push_back(b);
     btRigidBody* s2 = nullptr;
     for(int i = 0; i < 20; i++){
-        
+//        Brick b2 = Brick(Vector3(1,1,0));
+//        b2.setLocation(0, 25-0.4*i, 10);
+//        b2.physics(0, 25-0.4*i,10,0.2,1);
+//        Window::rope_list.push_back(b2);
+
         s2 = createSphere(0.2, 0, 25-0.4*i, 10, 1);
-        
+        Window::bodies.push_back(s2);
         btGeneric6DofConstraint * joint6DOF;
         
         btTransform localA, localB, toground;
@@ -302,12 +312,14 @@ void initWalls(){
         
         
         
+        //joint6DOF = new btGeneric6DofConstraint(*(b.rb), *(b2.rb), localA, localB,useLinearReferenceFrameA);
         joint6DOF = new btGeneric6DofConstraint(*s1, *s2, localA, localB,useLinearReferenceFrameA);
         
         
         
         Globals::dynamicsWorld->addConstraint(joint6DOF);
         s1 = s2;
+        //b = b2;
     }
     
     Window::ball = Ball(Vector3(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX));
@@ -338,7 +350,8 @@ void initWalls(){
     
     
     
-    joint6DOF = new btGeneric6DofConstraint(*s2, *Window::ball.rb, localA, localB,useLinearReferenceFrameA);
+    //joint6DOF = new btGeneric6DofConstraint(*(b.rb), *(Window::ball.rb), localA, localB,useLinearReferenceFrameA);
+    joint6DOF = new btGeneric6DofConstraint(*s1, *(Window::ball.rb), localA, localB,useLinearReferenceFrameA);
     
     
     

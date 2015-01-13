@@ -17,6 +17,8 @@ int Window::height = 512;   // set window height in pixels here
 Matrix4 Window::world = Matrix4();
 Ball Window::ball = Ball(Vector3(0,1,0));
 vector<Brick> Window::b_list;
+vector<Brick> Window::rope_list;
+vector<btRigidBody*> Window::bodies;
 int Movement;
 Vector3 lastPoint = Vector3(0, 0, 0);
 Vector3 lastPoint_z = Vector3(0, 0, 0);
@@ -67,12 +69,34 @@ void Window::displayCallback()
     glVertex3f(100, -1, 100);
     glVertex3f(-100, -1, 100);
     glEnd();
-    
+    for(int i = 0; i < bodies.size();i++){
+        if (bodies[i]->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
+            
+            renderSphere(bodies[i]);
+            
+        }
+        
+        if (bodies[i]->getCollisionShape()->getShapeType() == STATIC_PLANE_PROXYTYPE) {
+            
+            renderPlane(bodies[i]);
+            
+        }
+        
+        if (bodies[i]->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
+            
+            renderCube(bodies[i]);
+            
+        }
+    }
+
     ball.draw(Globals::camera->getMatrix()*glmatrix*world);
     for(int i = 0; i < b_list.size(); i++){
-        b_list[i].draw(Globals::camera->getMatrix()*glmatrix*world);
+        b_list[i].draw(Globals::camera->getMatrix()*glmatrix*world, 2.0);
     }
-    Globals::dynamicsWorld->debugDrawWorld();
+//    for(int i = 0; i < rope_list.size();i++){
+//        rope_list[i].draw(Globals::camera->getMatrix()*glmatrix*world, 0.4);
+//    }
+    //Globals::dynamicsWorld->debugDrawWorld();
     //Globals::softworld->debugDrawWorld();
     glmatrix.identity();
     glmatrix.transpose();
@@ -211,4 +235,212 @@ void Window::mouse(int button, int state, int x, int y)
     glMatrixMode(GL_MODELVIEW);
 }
 
+void Window::renderPlane(btRigidBody* body)
+{
+    glColor3f(1, 1, 1);
+    
+    btTransform t;
+    
+    body->getMotionState()->getWorldTransform(t);
+    
+    float mat[16];
+    
+    t.getOpenGLMatrix(mat);
+    
+    glPushMatrix();
+    
+    glMultMatrixf(mat);	//multiplying the current matrix with it moves the object in place
+    
+    glBegin(GL_QUADS);
+    
+    glNormal3f(0, 1, 0);
+    
+    glVertex3f(-20, 0, 20);
+    
+    glVertex3f(-20, 0, -20);
+    
+    glVertex3f(20, 0, -20);
+    
+    glVertex3f(20, 0, 20);
+    
+    glEnd();
+    
+    glPopMatrix();
+    
+}
+
+
+void Window::renderSphere(btRigidBody* body)
+
+{
+    
+    //printf("render ball\n");
+    
+    if (body->getCollisionShape()->getShapeType()!= SPHERE_SHAPE_PROXYTYPE) {
+        
+        printf("not sphere\n");
+        
+        return;
+        
+    }
+    
+    glColor3f(0.6, 0.6, 0.6);
+    
+    float r = ((btSphereShape*)body->getCollisionShape())->getRadius();
+    
+    //printf("rad is %f\n",r);
+    
+    btTransform t;
+    
+    body->getMotionState()->getWorldTransform(t);
+    
+    float mat[16];
+    
+    t.getOpenGLMatrix(mat);
+    
+    glPushMatrix();
+    
+    glMultMatrixf(mat);	//multiplying the current matrix with it moves the object in place
+    
+    glutSolidSphere(r, 20, 20);
+    
+    //gluSolidSphere(r, 20, 20);
+    
+    glPopMatrix();
+    
+}
+
+
+
+void Window::renderCube(btRigidBody* body)
+
+{
+    
+    //printf("render cube!\n");
+    
+    if (body->getCollisionShape()->getShapeType()!= BOX_SHAPE_PROXYTYPE) {
+        
+        printf("not box\n");
+        
+        return;
+        
+    }
+    
+    glColor3f(1, 1, 0);
+    
+    btVector3 extent = ((btBoxShape*)body->getCollisionShape())->getHalfExtentsWithoutMargin();
+    
+    //printf("rad is %f\n",r);
+    
+    btTransform t;
+    
+    body->getMotionState()->getWorldTransform(t);
+    
+    //printf("%f,%f,%f, ex %f,%f,%f\n",t.getOrigin().getX(),t.getOrigin().getY(),t.getOrigin().getZ(),extent.x(),extent.y(),extent.z());
+    
+    float mat[16];
+    
+    t.getOpenGLMatrix(mat);
+    
+    glPushMatrix();
+    
+    glMultMatrixf(mat);	//multiplying the current matrix with it moves the object in place
+    glBegin(GL_QUADS);
+    
+    glNormal3f(-1, 0, 0);
+    
+    glVertex3f(-extent.x(), extent.y(), -extent.z());
+    
+    glVertex3f(-extent.x(), -extent.y(), -extent.z());
+    
+    glVertex3f(-extent.x(), -extent.y(), extent.z());
+    
+    glVertex3f(-extent.x(), extent.y(), extent.z());
+    
+    glEnd();
+    
+    
+    
+    glBegin(GL_QUADS);
+    
+    glNormal3f(1, 0, 0);
+    
+    glVertex3f(extent.x(), extent.y(), -extent.z());
+    
+    glVertex3f(extent.x(), -extent.y(), -extent.z());
+    
+    glVertex3f(extent.x(), -extent.y(), extent.z());
+    
+    glVertex3f(extent.x(), extent.y(), extent.z());
+    
+    glEnd();
+    
+    
+    
+    glBegin(GL_QUADS);
+    
+    glNormal3f(0, 0, 1);
+    
+    glVertex3f(-extent.x(), extent.y(), extent.z());
+    
+    glVertex3f(-extent.x(), -extent.y(), extent.z());
+    
+    glVertex3f(extent.x(), -extent.y(), extent.z());
+    
+    glVertex3f(extent.x(), extent.y(), extent.z());
+    
+    glEnd();
+    
+    
+    
+    glBegin(GL_QUADS);
+    
+    glNormal3f(-1, 0, -1);
+    
+    glVertex3f(-extent.x(), extent.y(), -extent.z());
+    
+    glVertex3f(-extent.x(), -extent.y(), -extent.z());
+    
+    glVertex3f(extent.x(), -extent.y(), -extent.z());
+    
+    glVertex3f(extent.x(), extent.y(), -extent.z());
+    
+    glEnd();
+    
+    
+    
+    glBegin(GL_QUADS);
+    
+    glNormal3f(0, 1, 0);
+    
+    glVertex3f(-extent.x(), extent.y(), -extent.z());
+    
+    glVertex3f(-extent.x(), extent.y(), extent.z());
+    
+    glVertex3f(extent.x(), extent.y(), extent.z());
+    
+    glVertex3f(extent.x(), extent.y(), -extent.z());
+    
+    glEnd();
+    
+    
+    
+    glBegin(GL_QUADS);
+    
+    glNormal3f(0, -1, 0);
+    
+    glVertex3f(-extent.x(), -extent.y(), -extent.z());
+    
+    glVertex3f(-extent.x(), -extent.y(), extent.z());
+    
+    glVertex3f(extent.x(), -extent.y(), extent.z());
+    
+    glVertex3f(extent.x(), -extent.y(), -extent.z());
+    
+    glEnd();
+    
+    //glutSolidCube(1);
+    glPopMatrix();
+    
+}
 

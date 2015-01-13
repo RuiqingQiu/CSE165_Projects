@@ -14,7 +14,7 @@ Brick::Brick(Vector3 color){
     //world->addChild(piece);
     m_color = color;
 }
-void Brick::draw(Matrix4 C){
+void Brick::draw(Matrix4 C, float length){
     Matrix4 tmp = Matrix4();
     tmp.identity();
     btTransform trans;
@@ -34,7 +34,7 @@ void Brick::draw(Matrix4 C){
     glMultMatrixf(mat);	//multiplying the current matrix with it moves the object in place
     //glMultMatrixf(mat);
     glColor3f(m_color.getX(), m_color.getY(), m_color.getZ());
-    glutSolidCube(2);
+    glutSolidCube(length);
     glPopMatrix();
 }
 void Brick::setLocation(float x, float y, float z){
@@ -43,17 +43,23 @@ void Brick::setLocation(float x, float y, float z){
     world->M = world->M * tmp;
 }
 
-void Brick::physics(float x, float y, float z){
-    btBoxShape* box = new btBoxShape(btVector3(1, 1, 1));
+
+void Brick::physics(float x, float y, float z, float length, float m_mass){
+    btTransform t2;
+    
+    t2.setIdentity();
+    
+    t2.setOrigin(btVector3(x,y,z));
+    btBoxShape* box = new btBoxShape(btVector3(length/2, length/2, length/2));
     //btCylinderShape* box = new btCylinderShape(btVector3(0.2f,0.2f,0.2f));
-    btVector3 inertia;
-    float mass = 1.0f;
+    btVector3 inertia(0,0,0);
+    float mass = m_mass;
     box->calculateLocalInertia(mass,inertia);
     
     btDefaultMotionState* MotionState =
-    new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(x, y, z)));
+    new btDefaultMotionState(t2);
     btRigidBody::btRigidBodyConstructionInfo info(mass,MotionState,box,inertia); //motion state would actually be non-null in most real usages
-    //info.m_restitution = 1.3f;
+    info.m_restitution = 0.5f;
     //info.m_friction = 1.5f;
     rb = new btRigidBody(info);
     Globals::dynamicsWorld->addRigidBody(rb);
