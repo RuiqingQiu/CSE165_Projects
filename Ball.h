@@ -18,9 +18,10 @@ class Ball{
 public:
     btRigidBody* rb;
     Vector3 m_color;
+    float radius;
     MatrixTransform* world; //Position in the world
-    Ball(Vector3 color);
-    void draw(Matrix4 C);
+    Ball(Vector3 color, float rad);
+    void draw(Matrix4 C, float length);
     void setLocation(float x, float y, float z);
     void physics(float x, float y, float z);
 };

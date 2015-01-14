@@ -7,15 +7,15 @@
 //
 
 #include "Ball.h"
-Ball::Ball(Vector3 color){
+Ball::Ball(Vector3 color,float rad){
     world = new MatrixTransform();
     Sphere* piece = new Sphere();
     piece->updateColor(color);
     world->addChild(piece);
     m_color = color;
-
+    radius = rad;
 }
-void Ball::draw(Matrix4 C){
+void Ball::draw(Matrix4 C, float length){
     Matrix4 tmp = Matrix4();
     tmp.identity();
     btTransform trans;
@@ -27,7 +27,7 @@ void Ball::draw(Matrix4 C){
     glPushMatrix();
     glMultMatrixf(mat);	//multiplying the current matrix with it moves the object in place
     glColor3f(m_color.getX(), m_color.getY(), m_color.getZ());
-    glutSolidSphere(1,20,20);
+    glutSolidSphere(length,20,20);
     glPopMatrix();
 }
 void Ball::setLocation(float x, float y, float z){
@@ -36,10 +36,10 @@ void Ball::setLocation(float x, float y, float z){
     world->M = world->M * tmp;
 }
 void Ball::physics(float x, float y, float z){
-    btSphereShape* sphereShape = new btSphereShape(1);
+    btSphereShape* sphereShape = new btSphereShape(radius);
     //btCylinderShape* box = new btCylinderShape(btVector3(0.2f,0.2f,0.2f));
     btVector3 inertia;
-    float mass = 10.0f;
+    float mass = 50.0f;
     sphereShape->calculateLocalInertia(mass,inertia);
     
     btDefaultMotionState* MotionState =

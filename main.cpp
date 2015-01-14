@@ -240,8 +240,8 @@ int main (int argc, char *argv[])
     Globals::cube.getMatrix().identity();
     Globals::camera = new Camera();
     Globals::camera->e->x = 0;
-    Globals::camera->e->y = 0;
-    Globals::camera->e->z = 10;
+    Globals::camera->e->y = 15;
+    Globals::camera->e->z = 30;
     Globals::camera->update();
     Globals::root.isRoot = true;
     //Init the wall
@@ -324,7 +324,7 @@ void initWalls(){
         //b = b2;
     }
     
-    Window::ball = Ball(Vector3(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX));
+    Window::ball = Ball(Vector3(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX), 2);
     Window::ball.setLocation(0, 10, 10);
     Window::ball.physics(0,10,10);
     

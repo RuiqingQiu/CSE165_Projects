@@ -36,7 +36,7 @@ public:
     static vector<Brick> rope_list;
     static vector<btRigidBody*> bodies;
     static void renderSphere(btRigidBody* body);
-
+    static void updateCamera();
     static void renderPlane(btRigidBody* body);
     static void renderCube(btRigidBody* body);
 
