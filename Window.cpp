@@ -421,39 +421,46 @@ btTypedConstraint*		m_pickConstraint;
 float force = 0.0;
 void	Window::mouseMove(int x,int y)
 {
-//        Vector3 direction = Vector3(0, 0, 0);
-//        float pixel_diff;
-//        float rot_angle, zoom_factor;
-//        Vector3 curPoint = Vector3(0,0,0);
-//        lastPoint.print("last point is ");
-//        switch (Movement) {
-//            case 0:{
-//                cout << "case 0" << endl;
-//                curPoint = trackBallMapping(x, y);//Map the mouse position to a logical sphere location
-//                direction = curPoint - lastPoint;
-//                float velocity = direction.length();
-//                if(velocity > 0.0001){
-//                    Vector3 rotAxis = lastPoint.cross(lastPoint, curPoint);
-//                    rot_angle = velocity * 100;
-//                    cout << "rot angle " << rot_angle << endl;
-//                    GLfloat objectXform[16];
-//                    glGetFloatv(GL_MODELVIEW_MATRIX, objectXform);
-//                    glLoadIdentity();
-//                    glRotatef(rot_angle, rotAxis.x, rotAxis.y, rotAxis.z);
-//                    glMultMatrixf(objectXform);
-//                    Matrix4 tmp = Matrix4();
-//                    tmp.makeRotate(rot_angle, rotAxis);
-//                    //Globals::bunny.getMatrix() = Globals::bunny.getMatrix() * tmp;
-//                    world = tmp * world;
-//                }
-//                break;
-//            }
-//            case 1:
-//                //cout << "case 1, right mouse button" << endl;
-//                pixel_diff =y - lastPoint_z.y;
-//                //cout << "pixel diff " << pixel_diff << endl;
-//                force = 100*pixel_diff;
-//                break;
+        Vector3 direction = Vector3(0, 0, 0);
+        float pixel_diff;
+        float rot_angle, zoom_factor;
+        Vector3 curPoint = Vector3(0,0,0);
+        lastPoint.print("last point is ");
+        switch (Movement) {
+            case 0:{
+                cout << "case 0" << endl;
+                curPoint = trackBallMapping(x, y);//Map the mouse position to a logical sphere location
+                direction = curPoint - lastPoint;
+                float velocity = direction.length();
+                if(velocity > 0.0001){
+                    Vector3 rotAxis = lastPoint.cross(lastPoint, curPoint);
+                    rot_angle = velocity * 100;
+                    cout << "rot angle " << rot_angle << endl;
+                    GLfloat objectXform[16];
+                    glGetFloatv(GL_MODELVIEW_MATRIX, objectXform);
+                    glLoadIdentity();
+                    glRotatef(rot_angle, rotAxis.x, rotAxis.y, rotAxis.z);
+                    glMultMatrixf(objectXform);
+                    Matrix4 tmp = Matrix4();
+                    tmp.makeRotate(rot_angle, rotAxis);
+                    //Globals::bunny.getMatrix() = Globals::bunny.getMatrix() * tmp;
+                    Vector4 new_e = Vector4(Globals::camera->e->getX(), Globals::camera->e->getY(), Globals::camera->e->getZ(), 0);
+                    tmp.transpose();
+                    new_e = tmp * new_e;
+                    Globals::camera->e->x = new_e.get_x();
+                    Globals::camera->e->y = new_e.get_y();
+                    Globals::camera->e->z = new_e.get_z();
+                    Globals::camera->update();
+                    //world = tmp * world;
+                }
+                break;
+            }
+            case 1:
+                //cout << "case 1, right mouse button" << endl;
+                pixel_diff =y - lastPoint_z.y;
+                //cout << "pixel diff " << pixel_diff << endl;
+                force = 100*pixel_diff;
+                break;
 //            /* Zoom on mouse right button */
 //    //        case 1:
 //    //            cout << "case 1" << endl;
@@ -465,9 +472,9 @@ void	Window::mouseMove(int x,int y)
 //    //            tmp.makeScale(zoom_factor, zoom_factor, zoom_factor);
 //    //            world = world * tmp;
 //    //            break;
-//        }
-//        lastPoint = curPoint;
-//        lastPoint_z = Vector3(x, y, 0);
+        }
+        lastPoint = curPoint;
+        lastPoint_z = Vector3(x, y, 0);
     if (m_pickConstraint)
     {
         //move the constraint pivot
@@ -703,7 +710,11 @@ void Window::mouse(int button, int state, int x, int y)
             }
             else
             {
-                
+                if(pickedBody){
+                    if(pickedBody->getCollisionShape()->getShapeType()== SPHERE_SHAPE_PROXYTYPE){
+                        Globals::dynamicsWorld->removeConstraint(Globals::joint_ball);
+                    }
+                }
                 if (m_pickConstraint && Globals::dynamicsWorld)
                 {
                     Globals::dynamicsWorld->removeConstraint(m_pickConstraint);

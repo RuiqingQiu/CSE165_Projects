@@ -22,6 +22,7 @@ namespace Globals
     btSoftRigidDynamicsWorld* softworld;
     btSoftBodyWorldInfo	m_softBodyWorldInfo;
     vector<btRigidBody*> bodies;
+    btGeneric6DofConstraint * joint_ball;
 }
 btBroadphaseInterface* broadphase;
 btDefaultCollisionConfiguration* collisionConfiguration;
@@ -316,9 +317,10 @@ void initWalls(){
         
         //joint6DOF = new btGeneric6DofConstraint(*(b.rb), *(b2.rb), localA, localB,useLinearReferenceFrameA);
         joint6DOF = new btGeneric6DofConstraint(*s1, *s2, localA, localB,useLinearReferenceFrameA);
-        
-        
-        
+        joint6DOF->setLinearLowerLimit(btVector3(0,0,0));
+        joint6DOF->setLinearUpperLimit(btVector3(0,0,0));
+        joint6DOF->setAngularLowerLimit(btVector3(0,0,0));
+        joint6DOF->setAngularUpperLimit(btVector3(0,0,0));
         Globals::dynamicsWorld->addConstraint(joint6DOF);
         s1 = s2;
         //b = b2;
@@ -327,8 +329,7 @@ void initWalls(){
     Window::ball = Ball(Vector3(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX), 2);
     Window::ball.setLocation(0, 10, 10);
     Window::ball.physics(0,10,10);
-    
-    btGeneric6DofConstraint * joint6DOF;
+
     
     btTransform localA, localB, toground;
     
@@ -352,11 +353,11 @@ void initWalls(){
     
     
     //joint6DOF = new btGeneric6DofConstraint(*(b.rb), *(Window::ball.rb), localA, localB,useLinearReferenceFrameA);
-    joint6DOF = new btGeneric6DofConstraint(*s1, *(Window::ball.rb), localA, localB,useLinearReferenceFrameA);
+    Globals::joint_ball = new btGeneric6DofConstraint(*s1, *(Window::ball.rb), localA, localB,useLinearReferenceFrameA);
     
     
     
-    Globals::dynamicsWorld->addConstraint(joint6DOF);
+    Globals::dynamicsWorld->addConstraint(Globals::joint_ball);
     
     
 }

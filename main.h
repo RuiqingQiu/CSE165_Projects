@@ -29,6 +29,7 @@ namespace Globals
     extern MatrixTransform root;
     extern btSoftRigidDynamicsWorld* softworld;
     extern btSoftBodyWorldInfo	m_softBodyWorldInfo;
+    extern btGeneric6DofConstraint * joint_ball;
 };
 void physics_setup();
 void physics_cleanup();
