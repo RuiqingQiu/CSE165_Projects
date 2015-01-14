@@ -40,9 +40,19 @@ void Window::reshapeCallback(int w, int h)
     glViewport(0, 0, w, h);  // set new viewport size
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(60.0, double(width)/(double)height, 1.0, 1000.0);// set perspective projection viewing frustum
-    glTranslatef(0, 0, -20);    // move camera back 20 units so that it looks at the origin (or else it's in the origin)
+    //gluPerspective(60.0, double(width)/(double)height, 1.0, 1000.0);// set perspective projection viewing frustum
+    //glTranslatef(0, 0, -20);    // move camera back 20 units so that it looks at the origin (or else it's in the origin)
+    if (Window::width > Window::height)
+    {
+        //			glFrustum (-aspect, aspect, -1.0, 1.0, 1.0, 10000.0);
+        glFrustum (-double(width)/(double)height * 1, double(width)/(double)height * 1, -1, 1, 1, 1000);
+    } else
+    {
+        //			glFrustum (-1.0, 1.0, -aspect, aspect, 1.0, 10000.0);
+        glFrustum (-double(width)/(double)height * 1, double(width)/(double)height * 1, -1, 1, 1, 1000);
+    }
     glMatrixMode(GL_MODELVIEW);
+    
 }
 void Window::displayCallback()
 {
@@ -71,7 +81,7 @@ void Window::displayCallback()
     glEnd();
     for(int i = 0; i < bodies.size();i++){
         if (bodies[i]->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
-            
+            glColor3f(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX);
             renderSphere(bodies[i]);
             
         }
@@ -196,10 +206,9 @@ btVector3 getRayTo(int x,int y)
     
     btVector3	rayFrom = btVector3(Globals::camera->e->x,Globals::camera->e->y,Globals::camera->e->z);
     Vector3 tmp = *Globals::camera->d - *Globals::camera->e;
-
     btVector3 rayForward = btVector3(tmp.getX(), tmp.getY(), tmp.getZ());
     rayForward.normalize();
-    float farPlane = 10000.f;
+    float farPlane = 1000.f;
     rayForward*= farPlane;
     
     btVector3 rightOffset;
@@ -230,7 +239,6 @@ btVector3 getRayTo(int x,int y)
         vertical*=aspect;
     }
     
-    
     btVector3 rayToCenter = rayFrom + rayForward;
     btVector3 dHor = hor * 1.f/float(Window::width);
     btVector3 dVert = vertical * 1.f/float(Window::height);
@@ -248,176 +256,7 @@ int m_mouseButtons;
 int	m_mouseOldX;
 int	m_mouseOldY;
 btTypedConstraint*		m_pickConstraint;
-//
-//void Window::mouse(int button, int state, int x, int y)
-//{
-//    if (state == 0)
-//    {
-//        m_mouseButtons |= 1<<button;
-//    } else
-//    {
-//        m_mouseButtons = 0;
-//    }
-//    
-//    m_mouseOldX = x;
-//    m_mouseOldY = y;
-//    
-//    //printf("button %i, state %i, x=%i,y=%i\n",button,state,x,y);
-//    //button 0, state 0 means left mouse down
-//    
-//    btVector3 rayTo = getRayTo(x,y);
-//    
-//    switch (button)
-//    {
-//        case 2:
-//        {
-//            if (state==0)
-//            {
-//                cout << "shoot box" << endl;
-//                //shootBox(rayTo);
-//            }
-//            break;
-//        };
-//        case 1:
-//        {
-//            
-//            
-//            if (state==0)
-//            {
-//                
-//#if 0
-//                //apply an impulse
-//                if (m_dynamicsWorld)
-//                {
-//                    btCollisionWorld::ClosestRayResultCallback rayCallback(m_cameraPosition,rayTo);
-//                    m_dynamicsWorld->rayTest(m_cameraPosition,rayTo,rayCallback);
-//                    if (rayCallback.hasHit())
-//                    {
-//                        
-//                        btRigidBody* body = btRigidBody::upcast(rayCallback.m_collisionObject);
-//                        if (body)
-//                        {
-//                            body->setActivationState(ACTIVE_TAG);
-//                            btVector3 impulse = rayTo;
-//                            impulse.normalize();
-//                            float impulseStrength = 10.f;
-//                            impulse *= impulseStrength;
-//                            btVector3 relPos = rayCallback.m_hitPointWorld - body->getCenterOfMassPosition();
-//                            body->applyImpulse(impulse,relPos);
-//                        }
-//                    }
-//                }
-//#endif
-//                
-//                
-//                
-//            } else
-//            {
-//                
-//            }
-//            break;
-//        }
-//        case 0:
-//        {
-//            if (state==0)
-//            {
-//                
-//                
-//                //add a point to point constraint for picking
-//                if (Globals::dynamicsWorld)
-//                {
-//                    
-//                    btVector3 rayFrom;
-//                    
-//                    rayFrom = btVector3(Globals::camera->e->x,Globals::camera->e->y,Globals::camera->e->z);
-//                    
-//                    btCollisionWorld::ClosestRayResultCallback rayCallback(rayFrom,rayTo);
-//                    Globals::dynamicsWorld->rayTest(rayFrom,rayTo,rayCallback);
-//                    if (rayCallback.hasHit())
-//                    {
-//                        cout << "hit" << endl;
-////                        btRigidBody* body = btRigidBody::upcast(rayCallback.m_collisionObject);
-////                        if (body)
-////                        {
-////                            //other exclusions?
-////                            if (!(body->isStaticObject() || body->isKinematicObject()))
-////                            {
-////                                pickedBody = body;
-////                                pickedBody->setActivationState(DISABLE_DEACTIVATION);
-////                                
-////                                
-////                                btVector3 pickPos = rayCallback.m_hitPointWorld;
-////                                printf("pickPos=%f,%f,%f\n",pickPos.getX(),pickPos.getY(),pickPos.getZ());
-////                                
-////                                
-////                                btVector3 localPivot = body->getCenterOfMassTransform().inverse() * pickPos;
-////                                
-////                                
-////                                
-////                                    btTransform tr;
-////                                    tr.setIdentity();
-////                                    tr.setOrigin(localPivot);
-////                                    btGeneric6DofConstraint* dof6 = new btGeneric6DofConstraint(*body, tr,false);
-////                                    dof6->setLinearLowerLimit(btVector3(0,0,0));
-////                                    dof6->setLinearUpperLimit(btVector3(0,0,0));
-////                                    dof6->setAngularLowerLimit(btVector3(0,0,0));
-////                                    dof6->setAngularUpperLimit(btVector3(0,0,0));
-////                                    
-////                                    Globals::dynamicsWorld->addConstraint(dof6);
-////                                    m_pickConstraint = dof6;
-////                                    
-////                                    dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,0);
-////                                    dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,1);
-////                                    dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,2);
-////                                    dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,3);
-////                                    dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,4);
-////                                    dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,5);
-////                                    
-////                                    dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,0);
-////                                    dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,1);
-////                                    dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,2);
-////                                    dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,3);
-////                                    dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,4);
-////                                    dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,5);
-////                                
-////                                //save mouse position for dragging
-////                                gOldPickingPos = rayTo;
-////                                gHitPos = pickPos;
-////                                
-////                                gOldPickingDist  = (pickPos-rayFrom).length();
-////                            }
-////                        }
-//                    }
-//                }
-//                
-//            }
-//            else
-//            {
-//                
-//                if (m_pickConstraint && Globals::dynamicsWorld)
-//                {
-//                    Globals::dynamicsWorld->removeConstraint(m_pickConstraint);
-//                    delete m_pickConstraint;
-//                    //printf("removed constraint %i",gPickingConstraintId);
-//                    m_pickConstraint = 0;
-//                    pickedBody->forceActivationState(ACTIVE_TAG);
-//                    pickedBody->setDeactivationTime( 0.f );
-//                    pickedBody = 0;
-//                }
-//                
-//                
-//            }
-//            
-//            break;
-//            
-//        }
-//        default:
-//        {
-//        }
-//    }
-//    
-//}
-//
+
 float force = 0.0;
 void	Window::mouseMove(int x,int y)
 {
@@ -581,43 +420,6 @@ void	Window::mouseMove(int x,int y)
 //    lastPoint = curPoint;
 //    lastPoint_z = Vector3(x, y, 0);
 //}
-Vector3 GetPickRay(float mouse_x, float mouse_y)
-{
-//    Matrix4 tmp1 = Matrix4(
-//                          Vector4(13,8,1,50),
-//                          Vector4(20,29,2,25),
-//                          Vector4(1,30,3,15),
-//                          Vector4(-3,1,4,10)
-//    );
-//    tmp1.Inverse().print("inverse is ");
-    float x = (2.0f * mouse_x) / Window::width - 1.0f;
-    float y = 1.0f - (2.0f * mouse_y) / Window::height;
-    float z = 1.0f;
-    Vector3 ray_nds = Vector3 (x, y, z);
-    Vector4 ray_clip = Vector4 (ray_nds.x,ray_nds.y, -1.0, 1.0);
-    GLfloat model[16];
-    glGetFloatv(GL_PROJECTION_MATRIX, model);
-    Matrix4 projection_matrix = Matrix4(Vector4(model[0],model[4],model[8],model[12]),
-                                        Vector4(model[1],model[5],model[9],model[13]),
-                                        Vector4(model[2],model[6],model[10],model[14]),
-                                        Vector4(model[3],model[7],model[11],model[15]));
-    Vector4 ray_eye = projection_matrix.Inverse() * ray_clip;
-    
-    ray_eye = Vector4 (ray_eye.get_x(),ray_eye.get_y(), -1.0, 0.0);
-    glGetFloatv(GL_MODELVIEW_MATRIX, model);
-    Matrix4 view_matrix = Matrix4(Vector4(model[0],model[4],model[8],model[12]),
-                                        Vector4(model[1],model[5],model[9],model[13]),
-                                        Vector4(model[2],model[6],model[10],model[14]),
-                                        Vector4(model[3],model[7],model[11],model[15]));
-    Vector4 tmp = view_matrix.Inverse() * ray_eye;
-    Vector3 ray_wor = Vector3(tmp.get_x(),tmp.get_y(),tmp.get_z());
-
-    // don't forget to normalise the vector at some point
-    ray_wor.print("ray world position");
-    ray_wor.normalize();
-    ray_wor.print("ray world position");
-    return ray_wor;
-}
 void Window::mouse(int button, int state, int x, int y)
 {
     if (state == 0)
@@ -635,10 +437,10 @@ void Window::mouse(int button, int state, int x, int y)
     //button 0, state 0 means left mouse down
     switch(button){
             //Left-mouse button is being held down
-        case GLUT_LEFT_BUTTON:
+        case GLUT_RIGHT_BUTTON:
             Movement = 0;
             break;
-        case GLUT_RIGHT_BUTTON:
+        case GLUT_LEFT_BUTTON:
             Movement = 1;
             if(state == 0){
             //Vector3 m_rayTo = GetPickRay(x, y);
@@ -710,11 +512,11 @@ void Window::mouse(int button, int state, int x, int y)
             }
             else
             {
-                if(pickedBody){
-                    if(pickedBody->getCollisionShape()->getShapeType()== SPHERE_SHAPE_PROXYTYPE){
-                        Globals::dynamicsWorld->removeConstraint(Globals::joint_ball);
-                    }
-                }
+//                if(pickedBody){
+//                    if(pickedBody->getCollisionShape()->getShapeType()== SPHERE_SHAPE_PROXYTYPE){
+//                        Globals::dynamicsWorld->removeConstraint(Globals::joint_ball);
+//                    }
+//                }
                 if (m_pickConstraint && Globals::dynamicsWorld)
                 {
                     Globals::dynamicsWorld->removeConstraint(m_pickConstraint);
@@ -791,7 +593,7 @@ void Window::renderSphere(btRigidBody* body)
         
     }
     
-    glColor3f(0.6, 0.6, 0.6);
+    //glColor3f(0.6, 0.6, 0.6);
     
     float r = ((btSphereShape*)body->getCollisionShape())->getRadius();
     

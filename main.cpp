@@ -258,8 +258,8 @@ void initWalls(){
     Window::b_list.clear();
     Window::bodies.clear();
 
-    int row_max = 10;
-    int col_max = 10;
+    int row_max = 20;
+    int col_max = 20;
     
     for(int i = 0; i < row_max; i++){
         for(int j = 0; j < col_max; j++){
