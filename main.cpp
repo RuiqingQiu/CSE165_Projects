@@ -289,22 +289,18 @@ void generateShadowFBO()
 }
 
 
-/*
+
 int main (int argc, char *argv[])
 {
-    SampleListener listener;
+    // Create a sample listener and controller
+    LeapListener listener;
     Controller controller;
     
+    // Have the sample listener receive events from the controller
     controller.addListener(listener);
     
-    // Keep this process running until Enter is pressed
-    std::cout << "Press Enter to quit..." << std::endl;
-    std::cin.get();
-    
-    // Remove the sample listener when done
-    controller.removeListener(listener);
-    
-    return 0;
+    if (argc > 1 && strcmp(argv[1], "--bg") == 0)
+        controller.setPolicy(Leap::Controller::POLICY_BACKGROUND_FRAMES);
     
     srand (time(NULL));
     physics_setup();
@@ -380,9 +376,12 @@ int main (int argc, char *argv[])
     glutMainLoop();
     //delete everything used by the physics engine
     physics_cleanup();
+    // Remove the sample listener when done
+    controller.removeListener(listener);
+
     return 0;
 }
-*/
+
 void initHw2(){
     Window::cursor = Cursor(Vector3(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX), 1);
     Window::cursor.setLocation(0, 0, 0);

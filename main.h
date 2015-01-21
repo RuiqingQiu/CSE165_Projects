@@ -20,6 +20,7 @@
 #include "BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h"
 #include "BulletSoftBody/btSoftRigidDynamicsWorld.h"
 #include "Leap.h"
+#include "LeapListener.h"
 
 using namespace Leap;
 namespace Globals
