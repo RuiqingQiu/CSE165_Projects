@@ -221,9 +221,9 @@ void Window::draw2(){
     cursor.physics(listener.pos.x, listener.pos.y, listener.pos.z);
     cursor.draw(Globals::camera->getMatrix()*world, cursor.radius);
     glLineWidth(2.5);
-    glColor3f(1.0, 0.0, 0.0);
     if(listener.sample_points.size() > 1){
     for(int i = 0; i < listener.sample_points.size()-1;i++){
+        glColor3f(listener.corresponding_colors[i].x,listener.corresponding_colors[i].y,listener.corresponding_colors[i].z);
         glBegin(GL_LINES);
         glVertex3f(listener.sample_points[i].x,listener.sample_points[i].y,listener.sample_points[i].z);
         glVertex3f(listener.sample_points[i+1].x,listener.sample_points[i+1].y,listener.sample_points[i+1].z);
@@ -241,7 +241,7 @@ void Window::draw3(){
 void Window::displayCallback()
 {
     clock_t startTime = clock();
-    cout << listener.draw_mode << endl;
+    //cout << listener.draw_mode << endl;
     Globals::dynamicsWorld->stepSimulation(1 / 60.f, 10);
     //Globals::softworld->stepSimulation(1.0f/60.f,0);
     //tmp.print_height();

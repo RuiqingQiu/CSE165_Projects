@@ -21,6 +21,7 @@ using namespace Leap;
 class LeapListener : public Listener {
 public:
     Vector3 pos = Vector3(0,0,0);
+    Vector3 color = Vector3(1,0,0);
     bool draw_mode = false;
     virtual void onInit(const Controller&);
     virtual void onConnect(const Controller&);
@@ -34,6 +35,7 @@ public:
     virtual void onServiceDisconnect(const Controller&);
     vector<Brick> blist;
     vector<Vector3> sample_points;
+    vector<Vector3> corresponding_colors;
 private:
 };
 

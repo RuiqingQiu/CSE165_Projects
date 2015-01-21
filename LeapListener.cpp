@@ -49,8 +49,8 @@ void LeapListener::onFrame(const Controller& controller) {
     // Get the first hand
     const Hand hand = *hl;
     std::string handType = hand.isLeft() ? "Left hand" : "Right hand";
-    std::cout << std::string(2, ' ') << handType << ", id: " << hand.id()
-              << ", palm position: " << hand.palmPosition() << std::endl;
+    //std::cout << std::string(2, ' ') << handType << ", id: " << hand.id()
+      //        << ", palm position: " << hand.palmPosition() << std::endl;
     // Get the hand's normal vector and direction
     const Vector normal = hand.palmNormal();
     const Vector direction = hand.direction();
@@ -66,6 +66,7 @@ void LeapListener::onFrame(const Controller& controller) {
           pos.z = hand.palmPosition().z;
           if(draw_mode){
               sample_points.push_back(pos);
+              corresponding_colors.push_back(color);
           }
       }
 
@@ -123,12 +124,8 @@ void LeapListener::onFrame(const Controller& controller) {
 
         if (circle.pointable().direction().angleTo(circle.normal()) <= PI/2) {
           clockwiseness = "clockwise";
-            draw_mode = true;
-
         } else {
           clockwiseness = "counterclockwise";
-            draw_mode = false;
-
         }
 
         // Calculate angle swept since last frame
@@ -164,8 +161,7 @@ void LeapListener::onFrame(const Controller& controller) {
       }
       case Gesture::TYPE_KEY_TAP:
       {
-        draw_mode = !draw_mode;
-
+          draw_mode = !draw_mode;
         KeyTapGesture tap = gesture;
         std::cout << std::string(2, ' ')
           << "Key Tap id: " << gesture.id()
@@ -176,6 +172,7 @@ void LeapListener::onFrame(const Controller& controller) {
       }
       case Gesture::TYPE_SCREEN_TAP:
       {
+          color = Vector3(0,1,0);
         ScreenTapGesture screentap = gesture;
         std::cout << std::string(2, ' ')
           << "Screen Tap id: " << gesture.id()
@@ -191,7 +188,7 @@ void LeapListener::onFrame(const Controller& controller) {
   }
 
   if (!frame.hands().isEmpty() || !gestures.isEmpty()) {
-    std::cout << std::endl;
+    //std::cout << std::endl;
   }
 }
 
