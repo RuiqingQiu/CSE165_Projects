@@ -12,11 +12,16 @@
 #include <iostream>
 #include <string.h>
 #include "Leap.h"
-
+#include "Vector3.h"
+#include "Brick.h"
+#include <vector>
+#include "main.h"
 using namespace Leap;
 
 class LeapListener : public Listener {
 public:
+    Vector3 pos = Vector3(0,0,0);
+    bool draw_mode = false;
     virtual void onInit(const Controller&);
     virtual void onConnect(const Controller&);
     virtual void onDisconnect(const Controller&);
@@ -27,7 +32,8 @@ public:
     virtual void onDeviceChange(const Controller&);
     virtual void onServiceConnect(const Controller&);
     virtual void onServiceDisconnect(const Controller&);
-    
+    vector<Brick> blist;
+    vector<Vector3> sample_points;
 private:
 };
 

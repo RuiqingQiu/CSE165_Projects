@@ -13,6 +13,8 @@
 #include "MatrixTransform.h"
 #include "CubeG.h"
 #include "main.h"
+#include "btBulletDynamicsCommon.h"
+
 #include <GLUT/glut.h>
 
 class Brick{

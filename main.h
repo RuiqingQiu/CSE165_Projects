@@ -20,7 +20,6 @@
 #include "BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h"
 #include "BulletSoftBody/btSoftRigidDynamicsWorld.h"
 #include "Leap.h"
-#include "LeapListener.h"
 
 using namespace Leap;
 namespace Globals
@@ -42,7 +41,8 @@ namespace Globals
     extern GLuint fboId;
     extern Vector3 light_pos;
     extern int homework_num;
-
+    //extern LeapListener listener;
+    extern int draw_mode;
 };
 void physics_setup();
 void physics_cleanup();

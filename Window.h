@@ -16,6 +16,7 @@
 #include "main.h"
 #include "Brick.h"
 #include "Cursor.h"
+#include "LeapListener.h"
 
 class Window	  // OpenGL output window related routines
 {
@@ -46,7 +47,8 @@ public:
     
     //Draw function for homework 2
     static void draw2();
+    static void draw3();
     static Cursor cursor;
-
+    static LeapListener listener;
 };
 #endif /* defined(__CSE167_Final_Project__Window__) */

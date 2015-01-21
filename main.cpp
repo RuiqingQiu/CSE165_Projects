@@ -34,9 +34,12 @@ namespace Globals
     GLuint depthTextureId;
     // Hold id of the framebuffer for light POV rendering
     GLuint fboId;
-    Vector3 light_pos = Vector3(0,20,20);
+    Vector3 light_pos = Vector3(0,100,0);
     int homework_num = 2;
+    //LeapListener listener;
+    int draw_mode = 0; // 0 for no draw, 1 for draw
 }
+
 //1 for homework 1
 //2 for homework 2
 btBroadphaseInterface* broadphase;
@@ -241,8 +244,8 @@ void loadShadowShader()
 
 void generateShadowFBO()
 {
-    int shadowMapWidth = Window::width * 2;
-    int shadowMapHeight = Window::height * 2;
+    int shadowMapWidth = Window::width * 4;
+    int shadowMapHeight = Window::height * 4;
     
     //GLfloat borderColor[4] = {0,0,0,0};
     
@@ -293,11 +296,10 @@ void generateShadowFBO()
 int main (int argc, char *argv[])
 {
     // Create a sample listener and controller
-    LeapListener listener;
     Controller controller;
     
     // Have the sample listener receive events from the controller
-    controller.addListener(listener);
+    controller.addListener(Window::listener);
     
     if (argc > 1 && strcmp(argv[1], "--bg") == 0)
         controller.setPolicy(Leap::Controller::POLICY_BACKGROUND_FRAMES);
@@ -331,7 +333,7 @@ int main (int argc, char *argv[])
     // Generate light source:
     
     
-    float position[]  = {0, 20, 20, 0.0};// lightsource position
+    float position[]  = {0, 100, 0, 0.0};// lightsource position
     glLightfv(GL_LIGHT0, GL_POSITION, position);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -377,7 +379,7 @@ int main (int argc, char *argv[])
     //delete everything used by the physics engine
     physics_cleanup();
     // Remove the sample listener when done
-    controller.removeListener(listener);
+    controller.removeListener(Window::listener);
 
     return 0;
 }
@@ -401,7 +403,7 @@ void initWalls(){
             Brick b = Brick(Vector3(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX));
             if(j % 2 == 0){
                 b.setLocation(-row_max+2*i + 0.5, j*2, 0);
-                b.physics(-row_max+2*i + 0.5, j*2, 0, 2,1);
+                 b.physics(-row_max+2*i + 0.5, j*2, 0, 2,1);
             }
             else{
                 b.setLocation(-row_max+2*i, j*2, 0);

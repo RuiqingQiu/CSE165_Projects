@@ -24,7 +24,7 @@ Vector3 lastPoint = Vector3(0, 0, 0);
 Vector3 lastPoint_z = Vector3(0, 0, 0);
 
 Cursor Window::cursor = Cursor(Vector3(0,1,0),2);
-
+LeapListener Window::listener;
 //for moving the camera
 double eye_x = 0;
 double eye_y = 15;
@@ -42,16 +42,20 @@ void Window::reshapeCallback(int w, int h)
     glViewport(0, 0, w, h);  // set new viewport size
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    //gluPerspective(60.0, double(width)/(double)height, 1.0, 1000.0);// set perspective projection viewing frustum
-    //glTranslatef(0, 0, -20);    // move camera back 20 units so that it looks at the origin (or else it's in the origin)
-    if (Window::width > Window::height)
-    {
-        //			glFrustum (-aspect, aspect, -1.0, 1.0, 1.0, 10000.0);
-        glFrustum (-double(width)/(double)height * 1, double(width)/(double)height * 1, -1, 1, 1, 1000);
-    } else
-    {
+    if(Globals::homework_num == 2){
+    gluPerspective(60.0, double(width)/(double)height, 1.0, 1000.0);// set perspective projection viewing frustum
+    glTranslatef(0, 0, Globals::camera->position.z);// move camera back 20 units so that it looks at the origin (or else it's in the origin)
+    }
+    else if(Globals::homework_num == 1){
+        if (Window::width > Window::height)
+        {
+            //			glFrustum (-aspect, aspect, -1.0, 1.0, 1.0, 10000.0);
+            glFrustum (-double(width)/(double)height * 1, double(width)/(double)height * 1, -1, 1, 1, 1000);
+        } else
+        {
         //			glFrustum (-1.0, 1.0, -aspect, aspect, 1.0, 10000.0);
-        glFrustum (-double(width)/(double)height * 1, double(width)/(double)height * 1, -1, 1, 1, 1000);
+            glFrustum (-double(width)/(double)height * 1, double(width)/(double)height * 1, -1, 1, 1, 1000);
+        }
     }
     glMatrixMode(GL_MODELVIEW);
     
@@ -204,41 +208,40 @@ void Window::draw(){
 }
 
 void Window::draw2(){
-    glMatrixMode(GL_MODELVIEW);  // make sure we're in Modelview mode
-    // Tell OpenGL what ModelView matrix to use:
-    //gluLookAt(0, 15, 30, 0, 0, 0, 0, 1, 0);
-    //gluLookAt(eye_x,eye_y,eye_z,0, 0, 0,0, 1, 0);
-    Matrix4 glmatrix;
-    glmatrix.identity();
-    glmatrix = Globals::camera->getMatrix() * world;
-    glmatrix.transpose();
-    //glPushMatrix();
-    //glLoadIdentity();
-    glLoadMatrixd(glmatrix.getPointer());
-    glDisable(GL_CULL_FACE);
-    glBegin(GL_QUADS);
-    glColor3f(0.7, 1, 1);
-    glNormal3f(0, 1, 0);
-    glVertex3f(-1000, -1, -1000);
-    glVertex3f(1000, -1, -1000);
-    glVertex3f(1000, -1, 1000);
-    glVertex3f(-1000, -1, 1000);
-    glEnd();
-    glEnable(GL_CULL_FACE);
-
-    glPopMatrix();
     
-    cursor.draw(Globals::camera->getMatrix()*glmatrix*world, cursor.radius);
-    //Globals::dynamicsWorld->debugDrawWorld();
-    //Globals::softworld->debugDrawWorld();
-    glFlush();
+    glColor4f(0.3f,0.3f,0.3f,1);
+    glBegin(GL_QUADS);
+    glVertex3f(-50,0,-50);
+    glVertex3f(-50,0, 50);
+    glVertex3f( 50,0, 50);
+    glVertex3f( 50,0,-50);
+    glEnd();
+    glColor4f(0.9f,0.9f,0.9f,1);
+    cursor.setLocation(listener.pos.x, listener.pos.y, listener.pos.z);
+    cursor.physics(listener.pos.x, listener.pos.y, listener.pos.z);
+    cursor.draw(Globals::camera->getMatrix()*world, cursor.radius);
+    glLineWidth(2.5);
+    glColor3f(1.0, 0.0, 0.0);
+    if(listener.sample_points.size() > 1){
+    for(int i = 0; i < listener.sample_points.size()-1;i++){
+        glBegin(GL_LINES);
+        glVertex3f(listener.sample_points[i].x,listener.sample_points[i].y,listener.sample_points[i].z);
+        glVertex3f(listener.sample_points[i+1].x,listener.sample_points[i+1].y,listener.sample_points[i+1].z);
+        glEnd();
+    }
+    }
+
+//    for(int i = 0; i < listener.blist.size(); i++){
+//        listener.blist[i].draw(Globals::camera->getMatrix()*glmatrix*world, 2.0);
+//    }
 
 }
-
+void Window::draw3(){
+}
 void Window::displayCallback()
 {
     clock_t startTime = clock();
-    
+    cout << listener.draw_mode << endl;
     Globals::dynamicsWorld->stepSimulation(1 / 60.f, 10);
     //Globals::softworld->stepSimulation(1.0f/60.f,0);
     //tmp.print_height();
@@ -249,76 +252,76 @@ void Window::displayCallback()
     else if(Globals::homework_num == 2){
        
 
+        //draw2();
+        //First step: Render from the light POV to a FBO, story depth values only
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,Globals::fboId);	//Rendering offscreen
+        
+        //Using the fixed pipeline to render to the depthbuffer
+        glUseProgramObjectARB(0);
+        
+        // In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
+        glViewport(0,0,Window::width * 4,Window::height* 4);
+        
+        // Clear previous frame values
+        glClear(GL_DEPTH_BUFFER_BIT);
+        
+        //Disable color rendering, we only want to write to the Z-Buffer
+        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+        
+        setupMatrices(Globals::light_pos.x,Globals::light_pos.y,Globals::light_pos.z,0,0,-5);
+        
+        // Culling switching, rendering only backface, this is done to avoid self-shadowing
+        glCullFace(GL_FRONT);
         draw2();
-//        //First step: Render from the light POV to a FBO, story depth values only
-//        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,Globals::fboId);	//Rendering offscreen
-//        
-//        //Using the fixed pipeline to render to the depthbuffer
+        
+        //Save modelview/projection matrice into texture7, also add a biais
+        setTextureMatrix();
+        
+        
+        // Now rendering from the camera POV, using the FBO to generate shadows
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+        
+        glViewport(0,0,Window::width,Window::height);
+        
+        //Enabling color write (previously disabled for light POV z-buffer rendering)
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        
+        // Clear previous frame values
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
+        //Using the shadow shader
+        glUseProgramObjectARB(Globals::shadowShaderId);
+        glUniform1iARB(Globals::shadowMapUniform,7);
+        glActiveTextureARB(GL_TEXTURE7);
+        glBindTexture(GL_TEXTURE_2D,Globals::depthTextureId);
+        
+        setupMatrices(Globals::camera->e->x,Globals::camera->e->y,Globals::camera->e->z,
+                      Globals::camera->d->x,Globals::camera->d->y,Globals::camera->d->z);
+        
+        glCullFace(GL_BACK);
+        draw2();
+        
+        // DEBUG only. this piece of code draw the depth buffer onscreen
+        
 //        glUseProgramObjectARB(0);
-//        
-//        // In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
-//        glViewport(0,0,Window::width * 2,Window::height* 2);
-//        
-//        // Clear previous frame values
-//        glClear(GL_DEPTH_BUFFER_BIT);
-//        
-//        //Disable color rendering, we only want to write to the Z-Buffer
-//        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-//        
-//        setupMatrices(Globals::light_pos.x,Globals::light_pos.y,Globals::light_pos.z,0,0,-5);
-//        
-//        // Culling switching, rendering only backface, this is done to avoid self-shadowing
-//        glCullFace(GL_FRONT);
-//        draw2();
-//        
-//        //Save modelview/projection matrice into texture7, also add a biais
-//        setTextureMatrix();
-//        
-//        
-//        // Now rendering from the camera POV, using the FBO to generate shadows
-//        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
-//        
-//        glViewport(0,0,Window::width,Window::height);
-//        
-//        //Enabling color write (previously disabled for light POV z-buffer rendering)
-//        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-//        
-//        // Clear previous frame values
-//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//        
-//        //Using the shadow shader
-//        glUseProgramObjectARB(Globals::shadowShaderId);
-//        glUniform1iARB(Globals::shadowMapUniform,7);
-//        glActiveTextureARB(GL_TEXTURE7);
+//        glMatrixMode(GL_PROJECTION);
+//        glLoadIdentity();
+//        glOrtho(-Window::width/2,Window::width/2,-Window::height/2,Window::height/2,1,20);
+//        glMatrixMode(GL_MODELVIEW);
+//        glLoadIdentity();
+//        glColor4f(1,1,1,1);
+//        glActiveTextureARB(GL_TEXTURE0);
 //        glBindTexture(GL_TEXTURE_2D,Globals::depthTextureId);
-//        
-//        setupMatrices(Globals::camera->e->x,Globals::camera->e->y,Globals::camera->e->z,
-//                      Globals::camera->d->x,Globals::camera->d->y,Globals::camera->d->z);
-//        
-//        glCullFace(GL_BACK);
-//        draw2();
-//        
-//        // DEBUG only. this piece of code draw the depth buffer onscreen
-//        
-////        glUseProgramObjectARB(0);
-////        glMatrixMode(GL_PROJECTION);
-////        glLoadIdentity();
-////        glOrtho(-Window::width/2,Window::width/2,-Window::height/2,Window::height/2,1,20);
-////        glMatrixMode(GL_MODELVIEW);
-////        glLoadIdentity();
-////        glColor4f(1,1,1,1);
-////        glActiveTextureARB(GL_TEXTURE0);
-////        glBindTexture(GL_TEXTURE_2D,Globals::depthTextureId);
-////        glEnable(GL_TEXTURE_2D);
-////        glTranslated(0,0,-1);
-////        glBegin(GL_QUADS);
-////        glTexCoord2d(0,0);glVertex3f(0,0,0);
-////        glTexCoord2d(1,0);glVertex3f(Window::width/2,0,0);
-////        glTexCoord2d(1,1);glVertex3f(Window::width/2,Window::height/2,0);
-////        glTexCoord2d(0,1);glVertex3f(0,Window::height/2,0);
-//        
-//        glEnd();
-//        glDisable(GL_TEXTURE_2D);
+//        glEnable(GL_TEXTURE_2D);
+//        glTranslated(0,0,-1);
+//        glBegin(GL_QUADS);
+//        glTexCoord2d(0,0);glVertex3f(0,0,0);
+//        glTexCoord2d(1,0);glVertex3f(Window::width/2,0,0);
+//        glTexCoord2d(1,1);glVertex3f(Window::width/2,Window::height/2,0);
+//        glTexCoord2d(0,1);glVertex3f(0,Window::height/2,0);
+        
+        glEnd();
+        glDisable(GL_TEXTURE_2D);
     }
 
     
@@ -330,7 +333,7 @@ void Window::displayCallback()
     glutSwapBuffers();
     
     clock_t endTime = clock();
-    cout << "frame rate: " << 1.0/(float((endTime - startTime))/CLOCKS_PER_SEC) << endl;
+    //cout << "frame rate: " << 1.0/(float((endTime - startTime))/CLOCKS_PER_SEC) << endl;
 }
 void Window::idleCallback()
 {

@@ -36,15 +36,16 @@ void LeapListener::onExit(const Controller& controller) {
 void LeapListener::onFrame(const Controller& controller) {
   // Get the most recent frame and report some basic information
   const Frame frame = controller.frame();
-  std::cout << "Frame id: " << frame.id()
-            << ", timestamp: " << frame.timestamp()
-            << ", hands: " << frame.hands().count()
-            << ", extended fingers: " << frame.fingers().extended().count()
-            << ", tools: " << frame.tools().count()
-            << ", gestures: " << frame.gestures().count() << std::endl;
+//  std::cout << "Frame id: " << frame.id()
+//            << ", timestamp: " << frame.timestamp()
+//            << ", hands: " << frame.hands().count()
+//            << ", extended fingers: " << frame.fingers().extended().count()
+//            << ", tools: " << frame.tools().count()
+//            << ", gestures: " << frame.gestures().count() << std::endl;
 
   HandList hands = frame.hands();
-  for (HandList::const_iterator hl = hands.begin(); hl != hands.end(); ++hl) {
+  for (HandList::const_iterator hl = hands.begin(); hl != hands.end(); ++hl)
+  {
     // Get the first hand
     const Hand hand = *hl;
     std::string handType = hand.isLeft() ? "Left hand" : "Right hand";
@@ -53,37 +54,51 @@ void LeapListener::onFrame(const Controller& controller) {
     // Get the hand's normal vector and direction
     const Vector normal = hand.palmNormal();
     const Vector direction = hand.direction();
+      if(hand.isRight()){
+          pos.x = hand.palmPosition().x;
+          if((hand.palmPosition().y - 50) < 0){
+              pos.y = 0;
+          }
+          else{
+              pos.y = hand.palmPosition().y - 50;
+          }
 
-    // Calculate the hand's pitch, roll, and yaw angles
-    std::cout << std::string(2, ' ') <<  "pitch: " << direction.pitch() * RAD_TO_DEG << " degrees, "
-              << "roll: " << normal.roll() * RAD_TO_DEG << " degrees, "
-              << "yaw: " << direction.yaw() * RAD_TO_DEG << " degrees" << std::endl;
-
-    // Get the Arm bone
-    Arm arm = hand.arm();
-    std::cout << std::string(2, ' ') <<  "Arm direction: " << arm.direction()
-              << " wrist position: " << arm.wristPosition()
-              << " elbow position: " << arm.elbowPosition() << std::endl;
-
-    // Get fingers
-    const FingerList fingers = hand.fingers();
-    for (FingerList::const_iterator fl = fingers.begin(); fl != fingers.end(); ++fl) {
-      const Finger finger = *fl;
-      std::cout << std::string(4, ' ') <<  fingerNames[finger.type()]
-                << " finger, id: " << finger.id()
-                << ", length: " << finger.length()
-                << "mm, width: " << finger.width() << std::endl;
-
-      // Get finger bones
-      for (int b = 0; b < 4; ++b) {
-        Bone::Type boneType = static_cast<Bone::Type>(b);
-        Bone bone = finger.bone(boneType);
-        std::cout << std::string(6, ' ') <<  boneNames[boneType]
-                  << " bone, start: " << bone.prevJoint()
-                  << ", end: " << bone.nextJoint()
-                  << ", direction: " << bone.direction() << std::endl;
+          pos.z = hand.palmPosition().z;
+          if(draw_mode){
+              sample_points.push_back(pos);
+          }
       }
-    }
+
+//    // Calculate the hand's pitch, roll, and yaw angles
+//    std::cout << std::string(2, ' ') <<  "pitch: " << direction.pitch() * RAD_TO_DEG << " degrees, "
+//              << "roll: " << normal.roll() * RAD_TO_DEG << " degrees, "
+//              << "yaw: " << direction.yaw() * RAD_TO_DEG << " degrees" << std::endl;
+//
+//    // Get the Arm bone
+//    Arm arm = hand.arm();
+//    std::cout << std::string(2, ' ') <<  "Arm direction: " << arm.direction()
+//              << " wrist position: " << arm.wristPosition()
+//              << " elbow position: " << arm.elbowPosition() << std::endl;
+//
+//    // Get fingers
+//    const FingerList fingers = hand.fingers();
+//    for (FingerList::const_iterator fl = fingers.begin(); fl != fingers.end(); ++fl) {
+//      const Finger finger = *fl;
+//      std::cout << std::string(4, ' ') <<  fingerNames[finger.type()]
+//                << " finger, id: " << finger.id()
+//                << ", length: " << finger.length()
+//                << "mm, width: " << finger.width() << std::endl;
+//
+//      // Get finger bones
+//      for (int b = 0; b < 4; ++b) {
+//        Bone::Type boneType = static_cast<Bone::Type>(b);
+//        Bone bone = finger.bone(boneType);
+//        std::cout << std::string(6, ' ') <<  boneNames[boneType]
+//                  << " bone, start: " << bone.prevJoint()
+//                  << ", end: " << bone.nextJoint()
+//                  << ", direction: " << bone.direction() << std::endl;
+//      }
+//    }
   }
 
   // Get tools
@@ -108,8 +123,12 @@ void LeapListener::onFrame(const Controller& controller) {
 
         if (circle.pointable().direction().angleTo(circle.normal()) <= PI/2) {
           clockwiseness = "clockwise";
+            draw_mode = true;
+
         } else {
           clockwiseness = "counterclockwise";
+            draw_mode = false;
+
         }
 
         // Calculate angle swept since last frame
@@ -129,6 +148,12 @@ void LeapListener::onFrame(const Controller& controller) {
       }
       case Gesture::TYPE_SWIPE:
       {
+          //draw_mode = !draw_mode;
+          Brick b = Brick(Vector3(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX));
+          b.setLocation(0, 20, 0);
+          b.physics(0, 20, 0, 2,10);
+          blist.push_back(b);
+
         SwipeGesture swipe = gesture;
         std::cout << std::string(2, ' ')
           << "Swipe id: " << gesture.id()
@@ -139,6 +164,8 @@ void LeapListener::onFrame(const Controller& controller) {
       }
       case Gesture::TYPE_KEY_TAP:
       {
+        draw_mode = !draw_mode;
+
         KeyTapGesture tap = gesture;
         std::cout << std::string(2, ' ')
           << "Key Tap id: " << gesture.id()
