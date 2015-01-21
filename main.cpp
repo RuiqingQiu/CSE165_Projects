@@ -10,8 +10,12 @@
 #include "Window.h"
 #include <iostream>
 #include <GLUT/glut.h>
+#include <OpenGL/OpenGL.h>
 #include "btBulletDynamicsCommon.h"
 #include "GLDebugDrawer.h"
+#include <string.h>
+using namespace Leap;
+
 namespace Globals
 {
     Cube cube;
@@ -23,7 +27,18 @@ namespace Globals
     btSoftBodyWorldInfo	m_softBodyWorldInfo;
     vector<btRigidBody*> bodies;
     btGeneric6DofConstraint * joint_ball;
+    // Use to activate/disable shadowShader
+    GLhandleARB shadowShaderId;
+    GLuint shadowMapUniform;
+    // Z values will be rendered to this texture when using fboId framebuffer
+    GLuint depthTextureId;
+    // Hold id of the framebuffer for light POV rendering
+    GLuint fboId;
+    Vector3 light_pos = Vector3(0,20,20);
+    int homework_num = 2;
 }
+//1 for homework 1
+//2 for homework 2
 btBroadphaseInterface* broadphase;
 btDefaultCollisionConfiguration* collisionConfiguration;
 btCollisionDispatcher* dispatcher;
@@ -70,54 +85,6 @@ void physics_setup(){
     groundRigidBody = new btRigidBody(groundRigidBodyCI);
     groundRigidBody->setRestitution(0);
     Globals::dynamicsWorld->addRigidBody(groundRigidBody);
-    //Window::bodies.push_back(groundRigidBody);
- 
-
-    //TRACEDEMO
-//    const int n=15;
-//    for(int i=0;i<n;++i)
-//    {
-//        btSoftBody* psb=btSoftBodyHelpers::CreateRope(Globals::m_softBodyWorldInfo,
-//                                                      btVector3(-10,0,i*0.25+10),
-//                                                      btVector3(10,0,i*0.25+10),
-//                                                      16,
-//                                                      1+2);
-//        psb->m_cfg.piterations		=	4;
-//        psb->m_materials[0]->m_kLST	=	0.1+(i/(btScalar)(n-1))*0.9;
-//        psb->setTotalMass(20);
-//        Globals::softworld->addSoftBody(psb);
-//    }
-
-    
-    
-    
-
-    
-//    trans.setIdentity();
-//    trans.setOrigin(btVector3(1,30,-5));
-//    localCreateRigidBody( mass,trans,shape);
-//    trans.setOrigin(btVector3(0,0,-5));
-//    
-//    btRigidBody* body0 = localCreateRigidBody( mass,trans,shape);
-//    trans.setOrigin(btVector3(2*CUBE_HALF_EXTENTS,20,0));
-//    mass = 1.f;
-//    //	btRigidBody* body1 = 0;//localCreateRigidBody( mass,trans,shape);
-//    btVector3 pivotInA(CUBE_HALF_EXTENTS,CUBE_HALF_EXTENTS,0);
-//    btTypedConstraint* p2p = new btPoint2PointConstraint(*body0,pivotInA);
-//    m_dynamicsWorld->addConstraint(p2p);
-//    p2p ->setBreakingImpulseThreshold(10.2);
-//    p2p->setDbgDrawSize(btScalar(5.f));
-    
-    
-    //    btDefaultMotionState* fallMotionState =
-    //    new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 10, 0)));
-    //    btScalar mass = 1;
-    //    btVector3 fallInertia(0, 0, 0);
-    //    fallShape->calculateLocalInertia(mass, fallInertia);
-    //    btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallShape, fallInertia);
-    //    Globals::fallRigidBody = new btRigidBody(fallRigidBodyCI);
-    //    Globals::fallRigidBody->setRestitution(0);
-    //    Globals::dynamicsWorld->addRigidBody(Globals::fallRigidBody);
 }
 
 btRigidBody* createSphere(float rad, float x, float y, float z, float mass)
@@ -190,14 +157,158 @@ void physics_cleanup(){
     delete collisionConfiguration;
     delete dispatcher;
     delete broadphase;
-    
-
 }
+/**PHYSICS END **/
+
+
+// Loading shader function
+GLhandleARB loadShader(char* filename, unsigned int type)
+{
+    FILE *pfile;
+    GLhandleARB handle;
+    const GLcharARB* files[1];
+    
+    // shader Compilation variable
+    GLint result;				// Compilation code result
+    GLint errorLoglength ;
+    char* errorLogText;
+    GLsizei actualErrorLogLength;
+    
+    char buffer[400000];
+    
+    // This will raise a warning on MS compiler
+    pfile = fopen(filename, "rb");
+    if(!pfile)
+    {
+        printf("Sorry, can't open file: '%s'.\n", filename);
+    }
+    
+    fread(buffer,sizeof(char),400000,pfile);
+    //printf("%s\n",buffer);
+    
+    
+    fclose(pfile);
+    
+    handle = glCreateShaderObjectARB(type);
+    if (!handle)
+    {
+        //We have failed creating the vertex shader object.
+        printf("Failed creating vertex shader object from file: %s.",filename);
+    }
+    
+    files[0] = (const GLcharARB*)buffer;
+    glShaderSourceARB(
+                      handle, //The handle to our shader
+                      1, //The number of files.
+                      files, //An array of const char * data, which represents the source code of theshaders
+                      NULL);
+    
+    glCompileShaderARB(handle);
+    
+    //Compilation checking.
+    glGetObjectParameterivARB(handle, GL_OBJECT_COMPILE_STATUS_ARB, &result);
+    
+    // If an error was detected.
+    if (!result)
+    {
+        //We failed to compile.
+        printf("Shader '%s' failed compilation.\n",filename);
+        
+        //Attempt to get the length of our error log.
+        glGetObjectParameterivARB(handle, GL_OBJECT_INFO_LOG_LENGTH_ARB, &errorLoglength);
+        
+    }
+    
+    return handle;
+}
+
+void loadShadowShader()
+{
+    GLhandleARB vertexShaderHandle;
+    GLhandleARB fragmentShaderHandle;
+    
+    vertexShaderHandle   = loadShader("/Users/ruiqingqiu/Desktop/Qiu_Code/CSE165/CSE165 HW1/VertexShader",GL_VERTEX_SHADER);
+    fragmentShaderHandle = loadShader("/Users/ruiqingqiu/Desktop/Qiu_Code/CSE165/CSE165 HW1/FragmentShader",GL_FRAGMENT_SHADER);
+    
+    Globals::shadowShaderId = glCreateProgramObjectARB();
+    
+    glAttachObjectARB(Globals::shadowShaderId,vertexShaderHandle);
+    glAttachObjectARB(Globals::shadowShaderId,fragmentShaderHandle);
+    glLinkProgramARB(Globals::shadowShaderId);
+    
+    Globals::shadowMapUniform = glGetUniformLocationARB(Globals::shadowShaderId,"ShadowMap");
+}
+
+void generateShadowFBO()
+{
+    int shadowMapWidth = Window::width * 2;
+    int shadowMapHeight = Window::height * 2;
+    
+    //GLfloat borderColor[4] = {0,0,0,0};
+    
+    GLenum FBOstatus;
+    
+    // Try to use a texture depth component
+    glGenTextures(1, &Globals::depthTextureId);
+    glBindTexture(GL_TEXTURE_2D, Globals::depthTextureId);
+    
+    // GL_LINEAR does not make sense for depth texture. However, next tutorial shows usage of GL_LINEAR and PCF
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    
+    // Remove artefact on the edges of the shadowmap
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+    
+    //glTexParameterfv( GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor );
+    
+    
+    
+    // No need to force GL_DEPTH_COMPONENT24, drivers usually give you the max precision if available
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    
+    // create a framebuffer object
+    glGenFramebuffersEXT(1, &Globals::fboId);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Globals::fboId);
+    
+    // Instruct openGL that we won't bind a color texture with the currently binded FBO
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    
+    // attach the texture to FBO depth attachment point
+    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, Globals::depthTextureId, 0);
+    
+    // check FBO status
+    FBOstatus = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+    if(FBOstatus != GL_FRAMEBUFFER_COMPLETE_EXT)
+    printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use FBO\n");
+    
+    // switch back to window-system-provided framebuffer
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+}
+
+
+/*
 int main (int argc, char *argv[])
 {
+    SampleListener listener;
+    Controller controller;
+    
+    controller.addListener(listener);
+    
+    // Keep this process running until Enter is pressed
+    std::cout << "Press Enter to quit..." << std::endl;
+    std::cin.get();
+    
+    // Remove the sample listener when done
+    controller.removeListener(listener);
+    
+    return 0;
+    
     srand (time(NULL));
     physics_setup();
-        float specular[]  = {1.0, 1.0, 1.0, 1.0};
+    float specular[]  = {1.0, 1.0, 1.0, 1.0};
     float shininess[] = {100.0};
     
     glutInit(&argc, argv);      	      	      // initialize GLUT
@@ -224,7 +335,7 @@ int main (int argc, char *argv[])
     // Generate light source:
     
     
-    float position[]  = {0.0, 10.0, 10.0, 0.0};	// lightsource position
+    float position[]  = {0, 20, 20, 0.0};// lightsource position
     glLightfv(GL_LIGHT0, GL_POSITION, position);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -245,15 +356,40 @@ int main (int argc, char *argv[])
     Globals::camera->e->z = 30;
     Globals::camera->update();
     Globals::root.isRoot = true;
-    //Init the wall
-    initWalls();
+    
+    generateShadowFBO();
+    loadShadowShader();
+    // This is important, if not here, FBO's depthbuffer won't be populated.
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(0,0,0,1.0f);
+    
+    glEnable(GL_CULL_FACE);
+    //glutDisplayFunc(renderScene);
+    //glutIdleFunc(renderScene);
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
+    
+    
+    if(Globals::homework_num == 1){
+        //Init the wall
+        initWalls();
+    }
+    else if (Globals::homework_num == 2){
+        initHw2();
+    }
+    
     glutMainLoop();
     //delete everything used by the physics engine
     physics_cleanup();
-    
-    
     return 0;
 }
+*/
+void initHw2(){
+    Window::cursor = Cursor(Vector3(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX), 1);
+    Window::cursor.setLocation(0, 0, 0);
+    Window::cursor.physics(0,0,0);
+}
+
+
 void initWalls(){
     Window::b_list.clear();
     Window::bodies.clear();
@@ -393,3 +529,4 @@ btRigidBody* localCreateRigidBody(float mass, const btTransform& startTransform,
     
     return body;
 }
+

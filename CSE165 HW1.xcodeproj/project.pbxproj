@@ -26,6 +26,10 @@
 		AA49252F1A5F4BE400C75039 /* Sphere.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA49252C1A5F4BE400C75039 /* Sphere.cpp */; };
 		AA4925321A5F50CA00C75039 /* Brick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA4925301A5F50CA00C75039 /* Brick.cpp */; };
 		AA4925351A5F59F000C75039 /* Ball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA4925331A5F59F000C75039 /* Ball.cpp */; };
+		AA73C6751A6EF78E00B47002 /* Cursor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA73C6731A6EF78E00B47002 /* Cursor.cpp */; };
+		AA73C67B1A6F2C7300B47002 /* libLeap.dylib in Copy Files */ = {isa = PBXBuildFile; fileRef = AA73C6761A6F2B7000B47002 /* libLeap.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		AA73C67D1A6F2EC500B47002 /* Sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA73C67C1A6F2EC500B47002 /* Sample.cpp */; };
+		AA73C67E1A6F2EEE00B47002 /* libLeap.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = AA73C6761A6F2B7000B47002 /* libLeap.dylib */; };
 		AA94A9D51A5DD302001E9E6F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA94A9D31A5DD302001E9E6F /* main.cpp */; };
 		AA94A9D71A5DD45A001E9E6F /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA94A9D61A5DD45A001E9E6F /* OpenGL.framework */; };
 		AA94A9D91A5DD45E001E9E6F /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA94A9D81A5DD45E001E9E6F /* GLUT.framework */; };
@@ -33,14 +37,16 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		AA949CB01A5DBCD1001E9E6F /* CopyFiles */ = {
+		AA949CB01A5DBCD1001E9E6F /* Copy Files */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
+			buildActionMask = 12;
+			dstPath = "";
+			dstSubfolderSpec = 6;
 			files = (
+				AA73C67B1A6F2C7300B47002 /* libLeap.dylib in Copy Files */,
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			name = "Copy Files";
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -77,6 +83,12 @@
 		AA4925311A5F50CA00C75039 /* Brick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Brick.h; sourceTree = "<group>"; };
 		AA4925331A5F59F000C75039 /* Ball.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Ball.cpp; sourceTree = "<group>"; };
 		AA4925341A5F59F000C75039 /* Ball.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ball.h; sourceTree = "<group>"; };
+		AA73C6731A6EF78E00B47002 /* Cursor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Cursor.cpp; sourceTree = "<group>"; };
+		AA73C6741A6EF78E00B47002 /* Cursor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cursor.h; sourceTree = "<group>"; };
+		AA73C6761A6F2B7000B47002 /* libLeap.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libLeap.dylib; sourceTree = "<group>"; };
+		AA73C6781A6F2BE000B47002 /* Leap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Leap.h; sourceTree = "<group>"; };
+		AA73C6791A6F2BE600B47002 /* LeapMath.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LeapMath.h; sourceTree = "<group>"; };
+		AA73C67C1A6F2EC500B47002 /* Sample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sample.cpp; sourceTree = "<group>"; };
 		AA949CB21A5DBCD1001E9E6F /* CSE165 HW1 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "CSE165 HW1"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA94A9D31A5DD302001E9E6F /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		AA94A9D41A5DD302001E9E6F /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
@@ -423,6 +435,8 @@
 		AA94B4BF1A5DD57F001E9E6F /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		AA94B4C01A5DD59B001E9E6F /* btBulletCollisionCommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = btBulletCollisionCommon.h; sourceTree = "<group>"; };
 		AA94B4C11A5DD59B001E9E6F /* btBulletDynamicsCommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = btBulletDynamicsCommon.h; sourceTree = "<group>"; };
+		AAF14D961A6701EC00BAB052 /* FragmentShader */ = {isa = PBXFileReference; lastKnownFileType = text; path = FragmentShader; sourceTree = "<group>"; };
+		AAF14D971A6701F400BAB052 /* VertexShader */ = {isa = PBXFileReference; lastKnownFileType = text; path = VertexShader; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -430,6 +444,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA73C67E1A6F2EEE00B47002 /* libLeap.dylib in Frameworks */,
 				AA0ED8E71A649CCA00232147 /* BulletSoftBody.framework in Frameworks */,
 				AA4924E51A5DD61500C75039 /* LinearMath.framework in Frameworks */,
 				AA0C6B581A5DD5F300DE2445 /* BulletDynamics.framework in Frameworks */,
@@ -481,6 +496,14 @@
 		AA949CA91A5DBCD1001E9E6F = {
 			isa = PBXGroup;
 			children = (
+				AA73C67C1A6F2EC500B47002 /* Sample.cpp */,
+				AA73C6791A6F2BE600B47002 /* LeapMath.h */,
+				AA73C6781A6F2BE000B47002 /* Leap.h */,
+				AA73C6761A6F2B7000B47002 /* libLeap.dylib */,
+				AA73C6731A6EF78E00B47002 /* Cursor.cpp */,
+				AA73C6741A6EF78E00B47002 /* Cursor.h */,
+				AAF14D971A6701F400BAB052 /* VertexShader */,
+				AAF14D961A6701EC00BAB052 /* FragmentShader */,
 				AA0ED8DE1A649A7900232147 /* GLDebugFont.h */,
 				AA0ED8CA1A649A7100232147 /* GLDebugFont.cpp */,
 				AA0ED8B11A649A1000232147 /* GLDebugDrawer.cpp */,
@@ -1307,7 +1330,7 @@
 			buildPhases = (
 				AA949CAE1A5DBCD1001E9E6F /* Sources */,
 				AA949CAF1A5DBCD1001E9E6F /* Frameworks */,
-				AA949CB01A5DBCD1001E9E6F /* CopyFiles */,
+				AA949CB01A5DBCD1001E9E6F /* Copy Files */,
 			);
 			buildRules = (
 			);
@@ -1367,9 +1390,11 @@
 				AA4925251A5F4B8D00C75039 /* MatrixTransform.cpp in Sources */,
 				AA4925351A5F59F000C75039 /* Ball.cpp in Sources */,
 				AA4925321A5F50CA00C75039 /* Brick.cpp in Sources */,
+				AA73C6751A6EF78E00B47002 /* Cursor.cpp in Sources */,
 				AA4925051A5E233F00C75039 /* Matrix4.cpp in Sources */,
 				AA49252F1A5F4BE400C75039 /* Sphere.cpp in Sources */,
 				AA49250B1A5E24CB00C75039 /* cube.cpp in Sources */,
+				AA73C67D1A6F2EC500B47002 /* Sample.cpp in Sources */,
 				AA4925261A5F4B8D00C75039 /* Geode.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1461,6 +1486,10 @@
 					"$(PROJECT_DIR)/src/LinearMath",
 					"$(PROJECT_DIR)/src/BulletSoftBody",
 				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -1474,6 +1503,10 @@
 					"$(PROJECT_DIR)/src/BulletDynamics",
 					"$(PROJECT_DIR)/src/LinearMath",
 					"$(PROJECT_DIR)/src/BulletSoftBody",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

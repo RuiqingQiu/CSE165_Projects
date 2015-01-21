@@ -28,13 +28,24 @@ void Brick::draw(Matrix4 C, float length){
         Vector3(mat[8],mat[9],mat[10]),
         Vector3(mat[12],mat[13],mat[14])
                   );
-    glPushMatrix();
     tmp = tmp * C;
     tmp.transpose();
-    glMultMatrixf(mat);	//multiplying the current matrix with it moves the object in place
-    //glMultMatrixf(mat);
+    
+  
+    //glLoadMatrixf(mat);
+    //glMultMatrixf(mat);	//multiplying the current matrix with it moves the object in place
+    glPushMatrix();
+    glMultMatrixf(mat);
+    //glTranslatef(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
     glColor3f(m_color.getX(), m_color.getY(), m_color.getZ());
     glutSolidCube(length);
+//    glMatrixMode(GL_TEXTURE);
+//    glActiveTextureARB(GL_TEXTURE7);
+//    glPushMatrix();
+//    glMultMatrixf(mat);
+//    //glTranslatef(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+//    glPopMatrix();
+//    glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
 }
 void Brick::setLocation(float x, float y, float z){

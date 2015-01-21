@@ -23,11 +23,13 @@ int Movement;
 Vector3 lastPoint = Vector3(0, 0, 0);
 Vector3 lastPoint_z = Vector3(0, 0, 0);
 
+Cursor Window::cursor = Cursor(Vector3(0,1,0),2);
 
 //for moving the camera
 double eye_x = 0;
 double eye_y = 15;
 double eye_z = 30;
+
 
 //----------------------------------------------------------------------------
 // Callback method called by GLUT when graphics window is resized by the user
@@ -54,14 +56,100 @@ void Window::reshapeCallback(int w, int h)
     glMatrixMode(GL_MODELVIEW);
     
 }
-void Window::displayCallback()
+// During translation, we also have to maintain the GL_TEXTURE8, used in the shadow shader
+// to determine if a vertex is in the shadow.
+void startTranslate(float x,float y,float z)
 {
-    clock_t startTime = clock();
+    glPushMatrix();
+    glTranslatef(x,y,z);
     
-    Globals::dynamicsWorld->stepSimulation(1 / 60.f, 10);
-    //Globals::softworld->stepSimulation(1.0f/60.f,0);
-    //tmp.print_height();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // clear color and depth buffers
+    glMatrixMode(GL_TEXTURE);
+    glActiveTextureARB(GL_TEXTURE7);
+    glPushMatrix();
+    glTranslatef(x,y,z);
+}
+
+void endTranslate()
+{
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+}
+
+
+
+void setupMatrices(float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z)
+{
+    
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    if (Window::width > Window::height)
+    {
+        //			glFrustum (-aspect, aspect, -1.0, 1.0, 1.0, 10000.0);
+        glFrustum (-double(Window::width)/(double)Window::height * 1, double(Window::width)/(double)Window::height * 1, -1, 1, 1, 1000);
+    } else
+    {
+        //			glFrustum (-1.0, 1.0, -aspect, aspect, 1.0, 10000.0);
+        glFrustum (-double(Window::width)/(double)Window::height * 1, double(Window::width)/(double)Window::height * 1, -1, 1, 1, 1000);
+    }
+    //gluPerspective(60,Window::width/Window::height,1,1000);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    //gluLookAt(position_x,position_y,position_z,lookAt_x,lookAt_y,lookAt_z,0,1,0);
+
+//    glLoadIdentity();
+//    Globals::camera->e->x = position_x;
+//    Globals::camera->e->y = position_y;
+//    Globals::camera->e->z = position_z;
+//    Globals::camera->d->x = lookAt_x;
+//    Globals::camera->d->y = lookAt_y;
+//    Globals::camera->d->z = lookAt_z;
+//    Globals::camera->update();
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+//    Matrix4 glmatrix = Globals::camera->getMatrix() * Window::world;
+//    glmatrix.transpose();
+//    glLoadMatrixd(glmatrix.getPointer());
+    gluLookAt(position_x,position_y,position_z,lookAt_x,lookAt_y,lookAt_z,0,1,0);
+
+}
+void setTextureMatrix(void)
+{
+    static double modelView[16];
+    static double projection[16];
+    
+    // This is matrix transform every coordinate x,y,z
+    // x = x* 0.5 + 0.5
+    // y = y* 0.5 + 0.5
+    // z = z* 0.5 + 0.5
+    // Moving from unit cube [-1,1] to [0,1]
+    const GLdouble bias[16] = {
+        0.5, 0.0, 0.0, 0.0,
+        0.0, 0.5, 0.0, 0.0,
+        0.0, 0.0, 0.5, 0.0,
+        0.5, 0.5, 0.5, 1.0};
+    
+    // Grab modelview and transformation matrices
+    glGetDoublev(GL_MODELVIEW_MATRIX, modelView);
+    glGetDoublev(GL_PROJECTION_MATRIX, projection);
+    
+    
+    glMatrixMode(GL_TEXTURE);
+    glActiveTextureARB(GL_TEXTURE7);
+    
+    glLoadIdentity();
+    glLoadMatrixd(bias);
+    
+    // concatating all matrice into one.
+    glMultMatrixd (projection);
+    glMultMatrixd (modelView);
+    
+    // Go back to normal matrix mode
+    glMatrixMode(GL_MODELVIEW);
+}
+//This draw function is for homework 1
+void Window::draw(){
     glMatrixMode(GL_MODELVIEW);  // make sure we're in Modelview mode
     // Tell OpenGL what ModelView matrix to use:
     //gluLookAt(0, 15, 30, 0, 0, 0, 0, 1, 0);
@@ -70,7 +158,10 @@ void Window::displayCallback()
     glmatrix.identity();
     glmatrix = Globals::camera->getMatrix() * world;
     glmatrix.transpose();
+    //glPushMatrix();
+    //glLoadIdentity();
     glLoadMatrixd(glmatrix.getPointer());
+    glDisable(GL_CULL_FACE);
     glBegin(GL_QUADS);
     glColor3f(0.7, 1, 1);
     glNormal3f(0, 1, 0);
@@ -79,15 +170,16 @@ void Window::displayCallback()
     glVertex3f(1000, -1, 1000);
     glVertex3f(-1000, -1, 1000);
     glEnd();
+    //glPopMatrix();
+    glEnable(GL_CULL_FACE);
+    
     for(int i = 0; i < bodies.size();i++){
         if (bodies[i]->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
             glColor3f(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX);
             renderSphere(bodies[i]);
-            
         }
         
         if (bodies[i]->getCollisionShape()->getShapeType() == STATIC_PLANE_PROXYTYPE) {
-            
             renderPlane(bodies[i]);
             cout << "render plane" << endl;
         }
@@ -98,29 +190,151 @@ void Window::displayCallback()
             
         }
     }
-
     ball.draw(Globals::camera->getMatrix()*glmatrix*world, ball.radius);
+    //ball.draw(Globals::camera->getMatrix()*glmatrix*world, ball.radius);
     for(int i = 0; i < b_list.size(); i++){
         b_list[i].draw(Globals::camera->getMatrix()*glmatrix*world, 2.0);
     }
-//    for(int i = 0; i < rope_list.size();i++){
-//        rope_list[i].draw(Globals::camera->getMatrix()*glmatrix*world, 0.4);
-//    }
+    //    for(int i = 0; i < rope_list.size();i++){
+    //        rope_list[i].draw(Globals::camera->getMatrix()*glmatrix*world, 0.4);
+    //    }
     //Globals::dynamicsWorld->debugDrawWorld();
     //Globals::softworld->debugDrawWorld();
-    glmatrix.identity();
-    glmatrix.transpose();
-    
-    //glLoadMatrixd(glmatrix.getPointer());
-    
     glFlush();
+}
+
+void Window::draw2(){
+    glMatrixMode(GL_MODELVIEW);  // make sure we're in Modelview mode
+    // Tell OpenGL what ModelView matrix to use:
+    //gluLookAt(0, 15, 30, 0, 0, 0, 0, 1, 0);
+    //gluLookAt(eye_x,eye_y,eye_z,0, 0, 0,0, 1, 0);
+    Matrix4 glmatrix;
+    glmatrix.identity();
+    glmatrix = Globals::camera->getMatrix() * world;
+    glmatrix.transpose();
+    //glPushMatrix();
+    //glLoadIdentity();
+    glLoadMatrixd(glmatrix.getPointer());
+    glDisable(GL_CULL_FACE);
+    glBegin(GL_QUADS);
+    glColor3f(0.7, 1, 1);
+    glNormal3f(0, 1, 0);
+    glVertex3f(-1000, -1, -1000);
+    glVertex3f(1000, -1, -1000);
+    glVertex3f(1000, -1, 1000);
+    glVertex3f(-1000, -1, 1000);
+    glEnd();
+    glEnable(GL_CULL_FACE);
+
+    glPopMatrix();
+    
+    cursor.draw(Globals::camera->getMatrix()*glmatrix*world, cursor.radius);
+    //Globals::dynamicsWorld->debugDrawWorld();
+    //Globals::softworld->debugDrawWorld();
+    glFlush();
+
+}
+
+void Window::displayCallback()
+{
+    clock_t startTime = clock();
+    
+    Globals::dynamicsWorld->stepSimulation(1 / 60.f, 10);
+    //Globals::softworld->stepSimulation(1.0f/60.f,0);
+    //tmp.print_height();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // clear color and depth buffers
+    if(Globals::homework_num == 1){
+        draw();
+    }
+    else if(Globals::homework_num == 2){
+       
+
+        draw2();
+//        //First step: Render from the light POV to a FBO, story depth values only
+//        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,Globals::fboId);	//Rendering offscreen
+//        
+//        //Using the fixed pipeline to render to the depthbuffer
+//        glUseProgramObjectARB(0);
+//        
+//        // In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
+//        glViewport(0,0,Window::width * 2,Window::height* 2);
+//        
+//        // Clear previous frame values
+//        glClear(GL_DEPTH_BUFFER_BIT);
+//        
+//        //Disable color rendering, we only want to write to the Z-Buffer
+//        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+//        
+//        setupMatrices(Globals::light_pos.x,Globals::light_pos.y,Globals::light_pos.z,0,0,-5);
+//        
+//        // Culling switching, rendering only backface, this is done to avoid self-shadowing
+//        glCullFace(GL_FRONT);
+//        draw2();
+//        
+//        //Save modelview/projection matrice into texture7, also add a biais
+//        setTextureMatrix();
+//        
+//        
+//        // Now rendering from the camera POV, using the FBO to generate shadows
+//        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+//        
+//        glViewport(0,0,Window::width,Window::height);
+//        
+//        //Enabling color write (previously disabled for light POV z-buffer rendering)
+//        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+//        
+//        // Clear previous frame values
+//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//        
+//        //Using the shadow shader
+//        glUseProgramObjectARB(Globals::shadowShaderId);
+//        glUniform1iARB(Globals::shadowMapUniform,7);
+//        glActiveTextureARB(GL_TEXTURE7);
+//        glBindTexture(GL_TEXTURE_2D,Globals::depthTextureId);
+//        
+//        setupMatrices(Globals::camera->e->x,Globals::camera->e->y,Globals::camera->e->z,
+//                      Globals::camera->d->x,Globals::camera->d->y,Globals::camera->d->z);
+//        
+//        glCullFace(GL_BACK);
+//        draw2();
+//        
+//        // DEBUG only. this piece of code draw the depth buffer onscreen
+//        
+////        glUseProgramObjectARB(0);
+////        glMatrixMode(GL_PROJECTION);
+////        glLoadIdentity();
+////        glOrtho(-Window::width/2,Window::width/2,-Window::height/2,Window::height/2,1,20);
+////        glMatrixMode(GL_MODELVIEW);
+////        glLoadIdentity();
+////        glColor4f(1,1,1,1);
+////        glActiveTextureARB(GL_TEXTURE0);
+////        glBindTexture(GL_TEXTURE_2D,Globals::depthTextureId);
+////        glEnable(GL_TEXTURE_2D);
+////        glTranslated(0,0,-1);
+////        glBegin(GL_QUADS);
+////        glTexCoord2d(0,0);glVertex3f(0,0,0);
+////        glTexCoord2d(1,0);glVertex3f(Window::width/2,0,0);
+////        glTexCoord2d(1,1);glVertex3f(Window::width/2,Window::height/2,0);
+////        glTexCoord2d(0,1);glVertex3f(0,Window::height/2,0);
+//        
+//        glEnd();
+//        glDisable(GL_TEXTURE_2D);
+    }
+
+    
+
+
+    //draw();
+    
+    
     glutSwapBuffers();
+    
     clock_t endTime = clock();
-    //cout << "frame rate: " << 1.0/(float((endTime - startTime))/CLOCKS_PER_SEC) << endl;
+    cout << "frame rate: " << 1.0/(float((endTime - startTime))/CLOCKS_PER_SEC) << endl;
 }
 void Window::idleCallback()
 {
-    Globals::cube.spin(1.0);   // rotate cube; if it spins too fast try smaller values and vice versa
+    //Globals::cube.spin(1.0);   // rotate cube; if it spins too fast try smaller values and vice versa
     displayCallback();
 }
 
@@ -371,55 +585,7 @@ void	Window::mouseMove(int x,int y)
     m_mouseOldX = x;
     m_mouseOldY = y;
 }
-//void Window::mouseMove(int x, int y){
-//    Vector3 direction = Vector3(0, 0, 0);
-//    float pixel_diff;
-//    float rot_angle, zoom_factor;
-//    Vector3 curPoint = Vector3(0,0,0);
-//    lastPoint.print("last point is ");
-//    switch (Movement) {
-//        case 0:{
-//            cout << "case 0" << endl;
-//            curPoint = trackBallMapping(x, y);//Map the mouse position to a logical sphere location
-//            direction = curPoint - lastPoint;
-//            float velocity = direction.length();
-//            if(velocity > 0.0001){
-//                Vector3 rotAxis = lastPoint.cross(lastPoint, curPoint);
-//                rot_angle = velocity * 100;
-//                cout << "rot angle " << rot_angle << endl;
-//                GLfloat objectXform[16];
-//                glGetFloatv(GL_MODELVIEW_MATRIX, objectXform);
-//                glLoadIdentity();
-//                glRotatef(rot_angle, rotAxis.x, rotAxis.y, rotAxis.z);
-//                glMultMatrixf(objectXform);
-//                Matrix4 tmp = Matrix4();
-//                tmp.makeRotate(rot_angle, rotAxis);
-//                //Globals::bunny.getMatrix() = Globals::bunny.getMatrix() * tmp;
-//                world = tmp * world;
-//            }
-//            break;
-//        }
-//        case 1:
-//            //cout << "case 1, right mouse button" << endl;
-//            pixel_diff =y - lastPoint_z.y;
-//            //cout << "pixel diff " << pixel_diff << endl;
-//            force = 100*pixel_diff;
-//            break;
-//        /* Zoom on mouse right button */
-////        case 1:
-////            cout << "case 1" << endl;
-////            pixel_diff = y - lastPoint_z.y;
-////            cout << "pixel diff " << pixel_diff << endl;
-////            zoom_factor = 1.0 + pixel_diff/50;
-////            cout << "zoom factor " << zoom_factor << endl;
-////            Matrix4 tmp = Matrix4();
-////            tmp.makeScale(zoom_factor, zoom_factor, zoom_factor);
-////            world = world * tmp;
-////            break;
-//    }
-//    lastPoint = curPoint;
-//    lastPoint_z = Vector3(x, y, 0);
-//}
+
 void Window::mouse(int button, int state, int x, int y)
 {
     if (state == 0)
@@ -615,6 +781,12 @@ void Window::renderSphere(btRigidBody* body)
     
     //gluSolidSphere(r, 20, 20);
     
+    glMatrixMode(GL_TEXTURE);
+    glActiveTextureARB(GL_TEXTURE7);
+    glPushMatrix();
+    glMultMatrixf(mat);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
     
 }

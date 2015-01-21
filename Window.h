@@ -15,6 +15,7 @@
 #include "CubeG.h"
 #include "main.h"
 #include "Brick.h"
+#include "Cursor.h"
 
 class Window	  // OpenGL output window related routines
 {
@@ -33,12 +34,19 @@ public:
     static Vector3 trackBallMapping(int x, int y);
     static Ball ball;
     static vector<Brick> b_list;
+    //Draw function for homework 1
+    static void draw();
+    
     static vector<Brick> rope_list;
     static vector<btRigidBody*> bodies;
     static void renderSphere(btRigidBody* body);
     static void updateCamera();
     static void renderPlane(btRigidBody* body);
     static void renderCube(btRigidBody* body);
+    
+    //Draw function for homework 2
+    static void draw2();
+    static Cursor cursor;
 
 };
 #endif /* defined(__CSE167_Final_Project__Window__) */
