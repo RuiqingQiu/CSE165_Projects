@@ -23,6 +23,7 @@ public:
     Vector3 pos = Vector3(0,0,0);
     Vector3 color = Vector3(1,0,0);
     bool draw_mode = false;
+    bool color_mode = false;
     virtual void onInit(const Controller&);
     virtual void onConnect(const Controller&);
     virtual void onDisconnect(const Controller&);

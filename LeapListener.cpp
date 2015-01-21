@@ -54,21 +54,7 @@ void LeapListener::onFrame(const Controller& controller) {
     // Get the hand's normal vector and direction
     const Vector normal = hand.palmNormal();
     const Vector direction = hand.direction();
-      if(hand.isRight()){
-          pos.x = hand.palmPosition().x;
-          if((hand.palmPosition().y - 50) < 0){
-              pos.y = 0;
-          }
-          else{
-              pos.y = hand.palmPosition().y - 50;
-          }
 
-          pos.z = hand.palmPosition().z;
-          if(draw_mode){
-              sample_points.push_back(pos);
-              corresponding_colors.push_back(color);
-          }
-      }
 
 //    // Calculate the hand's pitch, roll, and yaw angles
 //    std::cout << std::string(2, ' ') <<  "pitch: " << direction.pitch() * RAD_TO_DEG << " degrees, "
@@ -82,24 +68,77 @@ void LeapListener::onFrame(const Controller& controller) {
 //              << " elbow position: " << arm.elbowPosition() << std::endl;
 //
 //    // Get fingers
-//    const FingerList fingers = hand.fingers();
-//    for (FingerList::const_iterator fl = fingers.begin(); fl != fingers.end(); ++fl) {
-//      const Finger finger = *fl;
+    const FingerList fingers = hand.fingers();
+    for (FingerList::const_iterator fl = fingers.begin(); fl != fingers.end(); ++fl) {
+      const Finger finger = *fl;
 //      std::cout << std::string(4, ' ') <<  fingerNames[finger.type()]
 //                << " finger, id: " << finger.id()
 //                << ", length: " << finger.length()
 //                << "mm, width: " << finger.width() << std::endl;
-//
-//      // Get finger bones
-//      for (int b = 0; b < 4; ++b) {
-//        Bone::Type boneType = static_cast<Bone::Type>(b);
-//        Bone bone = finger.bone(boneType);
-//        std::cout << std::string(6, ' ') <<  boneNames[boneType]
-//                  << " bone, start: " << bone.prevJoint()
-//                  << ", end: " << bone.nextJoint()
-//                  << ", direction: " << bone.direction() << std::endl;
-//      }
-//    }
+        if(finger.type() == finger.TYPE_INDEX){
+            // Get finger bones
+            for (int b = 0; b < 4; ++b)
+            {
+                Bone::Type boneType = static_cast<Bone::Type>(b);
+                Bone bone = finger.bone(boneType);
+                if(boneType == bone.TYPE_DISTAL){
+//                        std::cout << std::string(6, ' ') <<  boneNames[boneType]
+//                            << " bone, start: " << bone.prevJoint()
+//                            << ", end: " << bone.nextJoint()
+//                            << ", direction: " << bone.direction() << std::endl;
+                    if(hand.isRight()){
+//                        if(pos.x < bone.prevJoint().x-5 || pos.x > bone.prevJoint().x + 5)
+//                            pos.x = bone.prevJoint().x;
+//                        if(pos.y < bone.prevJoint().y-5 || pos.y > bone.prevJoint().y + 5){
+//                            if((bone.prevJoint().y - 100) < 0){
+//                                pos.y = 0;
+//                            }
+//                            else{
+//                                pos.y = bone.prevJoint().y - 100;
+//                            }
+//                        }
+//                        if(pos.z < bone.prevJoint().z-5 || pos.z > bone.prevJoint().z + 5){
+//                            pos.z = bone.prevJoint().z;
+//                        }
+                        pos.x = bone.prevJoint().x-50;
+                        if((bone.prevJoint().y - 100) < 0){
+                            pos.y = 0;
+                        }
+                        else{
+                            pos.y = bone.prevJoint().y - 100;
+                        }
+                        pos.z = bone.prevJoint().z;
+
+                        if(draw_mode){
+                            sample_points.push_back(pos);
+                            corresponding_colors.push_back(color);
+                        }
+                    }
+                }
+            }
+        }
+        if(finger.type() == finger.TYPE_MIDDLE){
+            // Get finger bones
+                for (int b = 0; b < 4; ++b) {
+                    Bone::Type boneType = static_cast<Bone::Type>(b);
+                    Bone bone = finger.bone(boneType);
+                    if(boneType == bone.TYPE_DISTAL){
+                        //                        std::cout << std::string(6, ' ') <<  boneNames[boneType]
+                        //                            << " bone, start: " << bone.prevJoint()
+                        //                            << ", end: " << bone.nextJoint()
+                        //                            << ", direction: " << bone.direction() << std::endl;
+                        if(hand.isLeft() && color_mode){
+                            color.x = abs(bone.prevJoint().x);
+                            color.y = abs(bone.prevJoint().y-100);
+                            color.z = abs(bone.prevJoint().z);
+                            color.normalize();
+                            color.print("color is ");
+                        }
+                    }
+                }
+
+        }
+    }
   }
 
   // Get tools
@@ -124,8 +163,10 @@ void LeapListener::onFrame(const Controller& controller) {
 
         if (circle.pointable().direction().angleTo(circle.normal()) <= PI/2) {
           clockwiseness = "clockwise";
+            color_mode = true;
         } else {
           clockwiseness = "counterclockwise";
+            color_mode = false;
         }
 
         // Calculate angle swept since last frame
@@ -145,12 +186,7 @@ void LeapListener::onFrame(const Controller& controller) {
       }
       case Gesture::TYPE_SWIPE:
       {
-          //draw_mode = !draw_mode;
-          Brick b = Brick(Vector3(float(rand())/ RAND_MAX, float(rand())/ RAND_MAX, float(rand())/ RAND_MAX));
-          b.setLocation(0, 20, 0);
-          b.physics(0, 20, 0, 2,10);
-          blist.push_back(b);
-
+        //draw_mode = !draw_mode;
         SwipeGesture swipe = gesture;
         std::cout << std::string(2, ' ')
           << "Swipe id: " << gesture.id()
@@ -162,6 +198,7 @@ void LeapListener::onFrame(const Controller& controller) {
       case Gesture::TYPE_KEY_TAP:
       {
           draw_mode = !draw_mode;
+          
         KeyTapGesture tap = gesture;
         std::cout << std::string(2, ' ')
           << "Key Tap id: " << gesture.id()
@@ -172,7 +209,6 @@ void LeapListener::onFrame(const Controller& controller) {
       }
       case Gesture::TYPE_SCREEN_TAP:
       {
-          color = Vector3(0,1,0);
         ScreenTapGesture screentap = gesture;
         std::cout << std::string(2, ' ')
           << "Screen Tap id: " << gesture.id()

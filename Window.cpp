@@ -217,6 +217,10 @@ void Window::draw2(){
     glVertex3f( 50,0,-50);
     glEnd();
     glColor4f(0.9f,0.9f,0.9f,1);
+    startTranslate(-10, 20, 0);
+    glColor3f(listener.color.x,listener.color.y,listener.color.z);
+    glutSolidCube(2);
+    endTranslate();
     cursor.setLocation(listener.pos.x, listener.pos.y, listener.pos.z);
     cursor.physics(listener.pos.x, listener.pos.y, listener.pos.z);
     cursor.draw(Globals::camera->getMatrix()*world, cursor.radius);
