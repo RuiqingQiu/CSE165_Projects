@@ -80,6 +80,18 @@ void endTranslate()
     glPopMatrix();
 }
 
+void startScale(float x, float y, float z){
+    glScalef(x,y,z);
+    
+    glMatrixMode(GL_TEXTURE);
+    glActiveTextureARB(GL_TEXTURE7);
+    glScalef(x,y,z);
+}
+void endScale()
+{
+    glMatrixMode(GL_MODELVIEW);
+}
+
 
 
 void setupMatrices(float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z)
@@ -225,14 +237,19 @@ void Window::draw2(){
     cursor.physics(listener.pos.x, listener.pos.y, listener.pos.z);
     cursor.draw(Globals::camera->getMatrix()*world, cursor.radius);
     glLineWidth(2.5);
+    
     if(listener.sample_points.size() > 1){
-    for(int i = 0; i < listener.sample_points.size()-1;i++){
-        glColor3f(listener.corresponding_colors[i].x,listener.corresponding_colors[i].y,listener.corresponding_colors[i].z);
-        glBegin(GL_LINES);
-        glVertex3f(listener.sample_points[i].x,listener.sample_points[i].y,listener.sample_points[i].z);
-        glVertex3f(listener.sample_points[i+1].x,listener.sample_points[i+1].y,listener.sample_points[i+1].z);
-        glEnd();
-    }
+        for(int i = 0; i < listener.sample_points.size()-1;i++){
+            glColor3f(listener.corresponding_colors[i].x,listener.corresponding_colors[i].y,listener.corresponding_colors[i].z);
+            glBegin(GL_LINES);
+            glVertex3f(listener.sample_points[i].x,listener.sample_points[i].y,listener.sample_points[i].z);
+            glVertex3f(listener.sample_points[i+1].x,listener.sample_points[i+1].y,listener.sample_points[i+1].z);
+            glEnd();
+            glPushMatrix();
+            glTranslatef(listener.sample_points[i].x, listener.sample_points[i].y, listener.sample_points[i].z);
+            glutSolidCube(1);
+            glPopMatrix();
+        }
     }
 
 //    for(int i = 0; i < listener.blist.size(); i++){

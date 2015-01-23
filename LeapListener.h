@@ -37,6 +37,10 @@ public:
     vector<Brick> blist;
     vector<Vector3> sample_points;
     vector<Vector3> corresponding_colors;
+    int count = 0;
+    double x = 0.0;
+    double y = 0.0;
+    double z = 0.0;
 private:
 };
 
