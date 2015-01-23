@@ -229,10 +229,23 @@ void Window::draw2(){
     glVertex3f( 50,0,-50);
     glEnd();
     glColor4f(0.9f,0.9f,0.9f,1);
+    //Cube to indicate the color
     startTranslate(-10, 20, 0);
     glColor3f(listener.color.x,listener.color.y,listener.color.z);
     glutSolidCube(2);
     endTranslate();
+    //Cube to indicate draw mode, red for no draw, green for draw
+    startTranslate(10, 20, 0);
+    if(listener.draw_mode){
+        glColor3f(0, 1, 0);
+    }
+    else{
+        glColor3f(1, 0, 0);
+
+    }
+    glutSolidCube(2);
+    endTranslate();
+    
     cursor.setLocation(listener.pos.x, listener.pos.y, listener.pos.z);
     cursor.physics(listener.pos.x, listener.pos.y, listener.pos.z);
     cursor.draw(Globals::camera->getMatrix()*world, cursor.radius);
@@ -240,15 +253,25 @@ void Window::draw2(){
     
     if(listener.sample_points.size() > 1){
         for(int i = 0; i < listener.sample_points.size()-1;i++){
-            glColor3f(listener.corresponding_colors[i].x,listener.corresponding_colors[i].y,listener.corresponding_colors[i].z);
-            glBegin(GL_LINES);
-            glVertex3f(listener.sample_points[i].x,listener.sample_points[i].y,listener.sample_points[i].z);
-            glVertex3f(listener.sample_points[i+1].x,listener.sample_points[i+1].y,listener.sample_points[i+1].z);
-            glEnd();
-            glPushMatrix();
-            glTranslatef(listener.sample_points[i].x, listener.sample_points[i].y, listener.sample_points[i].z);
-            glutSolidCube(1);
-            glPopMatrix();
+            
+            //If the point is an end point
+            if(listener.sample_points[i+1].x == 1000.0 || listener.sample_points[i+1].y == 1000.0 || listener.sample_points[i+1].z == 1000.0){
+                i++;
+            }
+            else if((abs(listener.sample_points[i].x) > 20 || abs(listener.sample_points[i].y) > 20 || abs(listener.sample_points[i].z) > 20)){
+            }
+            //not a infinite point
+            else{
+                glBegin(GL_LINES);
+                glColor3f(listener.corresponding_colors[i].x,listener.corresponding_colors[i].y,listener.corresponding_colors[i].z);
+                glVertex3f(listener.sample_points[i].x,listener.sample_points[i].y,listener.sample_points[i].z);
+                glVertex3f(listener.sample_points[i+1].x,listener.sample_points[i+1].y,listener.sample_points[i+1].z);
+                glEnd();
+                glPushMatrix();
+                glTranslatef(listener.sample_points[i].x, listener.sample_points[i].y, listener.sample_points[i].z);
+                glutSolidCube(1);
+                glPopMatrix();
+            }
         }
     }
 
@@ -262,7 +285,7 @@ void Window::draw3(){
 void Window::displayCallback()
 {
     clock_t startTime = clock();
-    //cout << listener.draw_mode << endl;
+
     Globals::dynamicsWorld->stepSimulation(1 / 60.f, 10);
     //Globals::softworld->stepSimulation(1.0f/60.f,0);
     //tmp.print_height();

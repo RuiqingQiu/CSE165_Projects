@@ -78,41 +78,58 @@ void LeapListener::onFrame(const Controller& controller) {
 //                << "mm, width: " << finger.width() << std::endl;
         
         //The left hand pinch is used to draw or not draw
+//        if(hand.isLeft()){
+//            if(finger.type() == finger.TYPE_INDEX){
+//                // Get finger bones
+//                for (int b = 0; b < 4; ++b)
+//                {
+//                    Bone::Type boneType = static_cast<Bone::Type>(b);
+//                    Bone bone = finger.bone(boneType);
+//                    if(boneType == bone.TYPE_DISTAL){
+//                        index_pos.x = bone.prevJoint().x;
+//                        index_pos.y = bone.prevJoint().y;
+//                        index_pos.z = bone.prevJoint().z;
+//                    }
+//                }
+//            }
+//            else if(finger.type() == finger.TYPE_THUMB){
+//                for (int b = 0; b < 4; ++b)
+//                {
+//                    Bone::Type boneType = static_cast<Bone::Type>(b);
+//                    Bone bone = finger.bone(boneType);
+//                    if(boneType == bone.TYPE_DISTAL){
+//                        thumb_pos.x = bone.prevJoint().x;
+//                        thumb_pos.y = bone.prevJoint().y;
+//                        thumb_pos.z = bone.prevJoint().z;
+//                    }
+//                }
+//            }
+//            index_pos.print("index");
+//            thumb_pos.print("thumb");
+//            cout << "distance :" << index_pos.distance(thumb_pos) << endl;
+//            
+//            if(index_pos.distance(thumb_pos) < 70){
+//                draw_mode = true;
+//            }
+//            else{
+//                draw_mode = false;
+//            }
+//        }
         if(hand.isLeft()){
-            if(finger.type() == finger.TYPE_INDEX){
-                // Get finger bones
-                for (int b = 0; b < 4; ++b)
-                {
-                    Bone::Type boneType = static_cast<Bone::Type>(b);
-                    Bone bone = finger.bone(boneType);
-                    if(boneType == bone.TYPE_DISTAL){
-                        index_pos.x = bone.prevJoint().x;
-                        index_pos.y = bone.prevJoint().y;
-                        index_pos.z = bone.prevJoint().z;
-                    }
+            float pinch = hand.pinchStrength();
+            //cout << pinch << endl;
+            if(pinch == 0.0){
+                if(draw_mode == true){
+                    sample_points.push_back(Vector3(1000.0,1000.0,1000.0));
+                    corresponding_colors.push_back(Vector3(1,1,1));
                 }
-            }
-            else if(finger.type() == finger.TYPE_THUMB){
-                for (int b = 0; b < 4; ++b)
-                {
-                    Bone::Type boneType = static_cast<Bone::Type>(b);
-                    Bone bone = finger.bone(boneType);
-                    if(boneType == bone.TYPE_DISTAL){
-                        thumb_pos.x = bone.prevJoint().x;
-                        thumb_pos.y = bone.prevJoint().y;
-                        thumb_pos.z = bone.prevJoint().z;
-                    }
-                }
-            }
-            index_pos.print("index");
-            thumb_pos.print("thumb");
-            cout << "distance :" << index_pos.distance(thumb_pos) << endl;
-            //if the distance is less than 60, then change draw mode
-            if(index_pos.distance(thumb_pos) < 60){
-                draw_mode = true;
+
+                draw_mode = false;
+                //Add a point to indicate the line is done
+
             }
             else{
-                draw_mode = false;
+                draw_mode = true;
             }
         }
         //The pen is your index finger
@@ -146,12 +163,17 @@ void LeapListener::onFrame(const Controller& controller) {
                                 x = x / 30;
                                 y = y / 30;
                                 z = z / 30;
-                                pos.print("pushing pos");
+                                //pos.print("pushing pos");
 //                                pos.x = x;
 //                                pos.y = y;
 //                                pos.z = z;
-                                sample_points.push_back(Vector3(x,y,z));
-                                corresponding_colors.push_back(color);
+                                if(abs(x) > 50 || abs(y) > 50 || abs(z) > 50){
+                                    
+                                }
+                                else{
+                                    sample_points.push_back(Vector3(x,y,z));
+                                    corresponding_colors.push_back(color);
+                                }
                                 count = 0;
                             }
                             else{
@@ -177,7 +199,7 @@ void LeapListener::onFrame(const Controller& controller) {
                             color.y = abs(bone.prevJoint().y-100);
                             color.z = abs(bone.prevJoint().z);
                             color.normalize();
-                            color.print("color is ");
+                            //color.print("color is ");
                         }
                     }
                 }
