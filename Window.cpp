@@ -259,7 +259,7 @@ void Window::draw2(){
             if(listener.blist[i].m_x == 1000.0 || listener.blist[i].m_y == 1000.0 || listener.blist[i].m_z == 1000.0){
                 linked = false;
             }
-            else if((abs(listener.blist[i].m_x) > 20 || abs(listener.blist[i].m_y) > 20 || abs(listener.blist[i].m_z) > 20)){
+            else if((abs(listener.blist[i].m_x) > 30 || abs(listener.blist[i].m_y) > 30 || abs(listener.blist[i].m_z) > 30)){
                 cout << "enter here" << endl;
             }
             else{
@@ -274,15 +274,15 @@ void Window::draw2(){
                     
                     localA.setIdentity(); localB.setIdentity();
                     
-                    localA.setOrigin(btVector3(listener.blist[last].m_x,listener.blist[last].m_y,listener.blist[last].m_z));
+                    localA.setOrigin(btVector3(0,-0.5,0));
                     
-                    localB.setOrigin(btVector3(listener.blist[i].m_x,listener.blist[i].m_y,listener.blist[i].m_z));
+                    localB.setOrigin(btVector3(0,0.5,0));
                     joint6DOF = new btGeneric6DofConstraint(*listener.blist[last].rb, *listener.blist[i].rb, localA, localB,useLinearReferenceFrameA);
 
                     joint6DOF->setLinearLowerLimit(btVector3(0,0,0));
                     joint6DOF->setLinearUpperLimit(btVector3(0,0,0));
-                    joint6DOF->setAngularLowerLimit(btVector3(0,0,0));
-                    joint6DOF->setAngularUpperLimit(btVector3(0,0,0));
+                    //joint6DOF->setAngularLowerLimit(btVector3(0,0,0));
+                    //joint6DOF->setAngularUpperLimit(btVector3(0,0,0));
 
                     Globals::dynamicsWorld->addConstraint(joint6DOF);
                 }
@@ -300,17 +300,35 @@ void Window::draw2(){
             if(listener.sample_points[i+1].x == 1000.0 || listener.sample_points[i+1].y == 1000.0 || listener.sample_points[i+1].z == 1000.0){
                 i++;
             }
-            else if((abs(listener.sample_points[i].x) > 20 || abs(listener.sample_points[i].y) > 20 || abs(listener.sample_points[i].z) > 20)){
+            else if((abs(listener.sample_points[i].x) > 30 || abs(listener.sample_points[i].y) > 30 || abs(listener.sample_points[i].z) > 30)){
             }
             //not a infinite point
             else{
+                linked = false;
+                last = 0;
                 if(listener.physics_start && !listener.physics_state_changed){
                     if(listener.blist[i].m_x == 1000.0 || listener.blist[i].m_y == 1000.0 || listener.blist[i].m_z == 1000.0){
+                        linked = false;
                     }
-                    else if((abs(listener.blist[i].m_x) > 20 || abs(listener.blist[i].m_y) > 20 || abs(listener.blist[i].m_z) > 20)){
+                    else if((abs(listener.blist[i].m_x) > 30 || abs(listener.blist[i].m_y) > 30 || abs(listener.blist[i].m_z) > 30)){
                     }
                     else{
                         listener.blist[i].draw(world,0.5);
+                        if(linked){
+                            glPushMatrix();
+                            glBegin(GL_LINES);
+                            glColor3f(0,1,0);
+                            cout << listener.blist[last].m_x <<" " << listener.blist[last].m_y << " " <<listener.blist[last].m_z << endl;
+                            glVertex3f(listener.blist[last].m_x,listener.blist[last].m_y,listener.blist[last].m_z);
+                            glVertex3f(listener.blist[i].m_x,listener.blist[i].m_y,listener.blist[i].m_z);
+                            cout << listener.blist[i].m_x <<" " << listener.blist[i].m_y << " " <<listener.blist[i].m_z << endl;
+                            glEnd();
+                            glPopMatrix();
+                            cout << "in here" << endl;
+                        }
+                        linked = true;
+                        last = i;
+
                     }
                 }
                 else{

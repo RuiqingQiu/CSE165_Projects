@@ -159,10 +159,10 @@ void LeapListener::onFrame(const Controller& controller) {
                         y += pos.y;
                         z += pos.z;
                         if(draw_mode){
-                            if(count == 30){
-                                x = x / 30;
-                                y = y / 30;
-                                z = z / 30;
+                            if(count == 5){
+                                x = x / 5;
+                                y = y / 5;
+                                z = z / 5;
                                 if(abs(x) > 50 || abs(y) > 50 || abs(z) > 50){
                                     
                                 }
@@ -174,6 +174,9 @@ void LeapListener::onFrame(const Controller& controller) {
                                     corresponding_colors.push_back(color);
                                 }
                                 count = 0;
+                                x = 0;
+                                y = 0;
+                                z = 0;
                             }
                             else{
                                 count++;
@@ -252,7 +255,7 @@ void LeapListener::onFrame(const Controller& controller) {
       }
       case Gesture::TYPE_SWIPE:
       {
-        physics_start = true;
+        //physics_start = true;
         SwipeGesture swipe = gesture;
         std::cout << std::string(2, ' ')
           << "Swipe id: " << gesture.id()

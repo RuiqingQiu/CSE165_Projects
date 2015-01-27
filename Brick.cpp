@@ -20,6 +20,9 @@ void Brick::draw(Matrix4 C, float length){
     btTransform trans;
     rb->getMotionState()->getWorldTransform(trans);
     tmp.makeTranslate(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+    m_x = trans.getOrigin().getX();
+    m_y = trans.getOrigin().getY();
+    m_z = trans.getOrigin().getZ();
     float mat[16];
     trans.getOpenGLMatrix(mat);
     tmp = Matrix4(
