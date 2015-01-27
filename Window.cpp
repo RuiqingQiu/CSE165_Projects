@@ -218,7 +218,22 @@ void Window::draw(){
     //Globals::softworld->debugDrawWorld();
     glFlush();
 }
-
+void glLine(Vector3 start, Vector3 end, double const width, int const slices = 360)
+{
+    Vector3 d = Vector3(end.x - start.x, end.y - start.y, end.z - start.z);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    GLUquadric *const quadric = gluNewQuadric();
+    Vector3 z = Vector3(0,0,1);
+    double const angle = acos(z.dot(z, d) / sqrt(d.dot(d, d) * z.dot(z, z)));
+    cout << angle << endl;
+    z = d.cross(z, d);
+    glTranslated(start.x, start.y, start.z);
+    glRotated(angle * 180 / M_PI, z.x, z.y, z.z);
+    gluCylinder(quadric, width / 2, width / 2, sqrt(d.dot(d, d)), slices, 1);
+    glPopMatrix();
+    gluDeleteQuadric(quadric);
+}
 void Window::draw2(){
     
     glColor4f(0.3f,0.3f,0.3f,1);
@@ -238,6 +253,15 @@ void Window::draw2(){
     startTranslate(10, 20, 0);
     //Draw mode cube for indicating if it's in the draw mode
     if(listener.draw_mode){
+        glColor3f(0, 1, 0);
+    }
+    else{
+        glColor3f(1, 0, 0);
+    }
+    glutSolidCube(2);
+    endTranslate();
+    startTranslate(15, 20, 0);
+    if(listener.physics_start){
         glColor3f(0, 1, 0);
     }
     else{
@@ -267,7 +291,8 @@ void Window::draw2(){
                 cout << "enter here" << endl;
             }
             else{
-                listener.blist[i].physics(listener.blist[i].m_x, listener.blist[i].m_y, listener.blist[i].m_z, 0.5, 0.5);
+                int a = rand() / 2;
+                listener.blist[i].physics(listener.blist[i].m_x, listener.blist[i].m_y, listener.blist[i].m_z, 0.5, a);
                 if(linked){
                     btGeneric6DofConstraint * joint6DOF;
                     
@@ -277,9 +302,14 @@ void Window::draw2(){
                     
                     localA.setIdentity(); localB.setIdentity();
                     
-                    localA.setOrigin(btVector3(0,-0.5,0));
+                    float y_dist = abs(listener.blist[last].m_y - listener.blist[i].m_y);
+                    cout << y_dist << endl;
+                    if(y_dist < 0.5){
+                        y_dist = 0.5;
+                    }
+                    localA.setOrigin(btVector3(0,-y_dist,0));
                     
-                    localB.setOrigin(btVector3(0,0.5,0));
+                    localB.setOrigin(btVector3(0,y_dist,0));
                     cout << "last is " << last << endl;
                     cout << "current is " << i << endl;
                     joint6DOF = new btGeneric6DofConstraint(*listener.blist[last].rb, *listener.blist[i].rb, localA, localB,useLinearReferenceFrameA);
@@ -310,15 +340,16 @@ void Window::draw2(){
             else{
                 listener.blist[i].draw(world,0.5);
                 if(linked){
-                    glPushMatrix();
-                    glBegin(GL_LINES);
-                    glColor3f(0,1,0);
-                    //cout << listener.blist[last].m_x <<" " << listener.blist[last].m_y << " " <<listener.blist[last].m_z << endl;
-                    glVertex3f(listener.blist[last].m_x,listener.blist[last].m_y,listener.blist[last].m_z);
-                    glVertex3f(listener.blist[i].m_x,listener.blist[i].m_y,listener.blist[i].m_z);
-                    //cout << listener.blist[i].m_x <<" " << listener.blist[i].m_y << " " <<listener.blist[i].m_z << endl;
-                    glEnd();
-                    glPopMatrix();
+                    glLine(Vector3(listener.blist[last].m_x,listener.blist[last].m_y,listener.blist[last].m_z),Vector3(listener.blist[i].m_x,listener.blist[i].m_y,listener.blist[i].m_z),0.5,360);
+//                    glPushMatrix();
+//                    glBegin(GL_LINES);
+//                    glColor3f(0,1,0);
+//                    //cout << listener.blist[last].m_x <<" " << listener.blist[last].m_y << " " <<listener.blist[last].m_z << endl;
+//                    glVertex3f(listener.blist[last].m_x,listener.blist[last].m_y,listener.blist[last].m_z);
+//                    glVertex3f(listener.blist[i].m_x,listener.blist[i].m_y,listener.blist[i].m_z);
+//                    //cout << listener.blist[i].m_x <<" " << listener.blist[i].m_y << " " <<listener.blist[i].m_z << endl;
+//                    glEnd();
+//                    glPopMatrix();
                     //cout << "in here" << endl;
                 }
                 linked = true;
@@ -339,15 +370,16 @@ void Window::draw2(){
             //not a infinite point
             else{
                 
-                glBegin(GL_LINES);
+//                glBegin(GL_LINES);
                 glColor3f(listener.corresponding_colors[i].x,listener.corresponding_colors[i].y,listener.corresponding_colors[i].z);
-                glVertex3f(listener.sample_points[i].x,listener.sample_points[i].y,listener.sample_points[i].z);
-                glVertex3f(listener.sample_points[i+1].x,listener.sample_points[i+1].y,listener.sample_points[i+1].z);
-                glEnd();
-                glPushMatrix();
-                glTranslatef(listener.sample_points[i].x, listener.sample_points[i].y, listener.sample_points[i].z);
-                glutSolidCube(0.5);
-                glPopMatrix();
+//glVertex3f(listener.sample_points[i].x,listener.sample_points[i].y,listener.sample_points[i].z);
+//                glVertex3f(listener.sample_points[i+1].x,listener.sample_points[i+1].y,listener.sample_points[i+1].z);
+//                glEnd();
+                glLine(Vector3(listener.sample_points[i].x,listener.sample_points[i].y,listener.sample_points[i].z),Vector3(listener.sample_points[i+1].x,listener.sample_points[i+1].y,listener.sample_points[i+1].z),0.5,360);
+//                glPushMatrix();
+//                glTranslatef(listener.sample_points[i].x, listener.sample_points[i].y, listener.sample_points[i].z);
+//                glutSolidCube(0.5);
+//                glPopMatrix();
             }
         }
         }
@@ -358,8 +390,9 @@ void Window::draw3(){
 void Window::displayCallback()
 {
     clock_t startTime = clock();
-    if(listener.physics_start)
+    if(listener.physics_start){
         Globals::dynamicsWorld->stepSimulation(1 / 60.f, 10);
+    }
     //Globals::softworld->stepSimulation(1.0f/60.f,0);
     //tmp.print_height();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // clear color and depth buffers

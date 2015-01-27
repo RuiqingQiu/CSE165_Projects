@@ -19,37 +19,50 @@ void Brick::draw(Matrix4 C, float length){
     tmp.identity();
     btTransform trans;
     rb->getMotionState()->getWorldTransform(trans);
-    tmp.makeTranslate(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
-    m_x = trans.getOrigin().getX();
-    m_y = trans.getOrigin().getY();
-    m_z = trans.getOrigin().getZ();
-    float mat[16];
-    trans.getOpenGLMatrix(mat);
-    tmp = Matrix4(
-        Vector3(mat[0],mat[1],mat[2]),
-        Vector3(mat[4],mat[5],mat[6]),
-        Vector3(mat[8],mat[9],mat[10]),
-        Vector3(mat[12],mat[13],mat[14])
-                  );
-    tmp = tmp * C;
-    tmp.transpose();
-    
-  
+
+
+
+//    tmp = Matrix4(
+//        Vector3(mat[0],mat[1],mat[2]),
+//        Vector3(mat[4],mat[5],mat[6]),
+//        Vector3(mat[8],mat[9],mat[10]),
+//        Vector3(mat[12],mat[13],mat[14])
+//                  );
+//    tmp = tmp * C;
+//    tmp.transpose();
+    if(m_y < 0.5){
+        glPushMatrix();
+        glMultMatrixf(m_mat);
+        glColor3f(m_color.getX(), m_color.getY(), m_color.getZ());
+        glutSolidCube(length);
+        glPopMatrix();
+    }
+    else{
+        tmp.makeTranslate(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+        m_x = trans.getOrigin().getX();
+        m_y = trans.getOrigin().getY();
+        m_z = trans.getOrigin().getZ();
+        float mat[16];
+        trans.getOpenGLMatrix(mat);
+        for(int i = 0; i < 16; i++){
+            m_mat[i] = mat[i];
+        }
     //glLoadMatrixf(mat);
     //glMultMatrixf(mat);	//multiplying the current matrix with it moves the object in place
-    glPushMatrix();
-    glMultMatrixf(mat);
-    //glTranslatef(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
-    glColor3f(m_color.getX(), m_color.getY(), m_color.getZ());
-    glutSolidCube(length);
-//    glMatrixMode(GL_TEXTURE);
-//    glActiveTextureARB(GL_TEXTURE7);
-//    glPushMatrix();
-//    glMultMatrixf(mat);
-//    //glTranslatef(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
-//    glPopMatrix();
-//    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
+//        glPushMatrix();
+//        glMultMatrixf(mat);
+//        //glTranslatef(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+        glColor3f(m_color.getX(), m_color.getY(), m_color.getZ());
+//        //glutSolidCube(length);
+////    glMatrixMode(GL_TEXTURE);
+////    glActiveTextureARB(GL_TEXTURE7);
+////    glPushMatrix();
+////    glMultMatrixf(mat);
+////    //glTranslatef(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+////    glPopMatrix();
+////    glMatrixMode(GL_MODELVIEW);
+//        glPopMatrix();
+    }
 }
 void Brick::setLocation(float x, float y, float z){
     Matrix4 tmp = Matrix4();

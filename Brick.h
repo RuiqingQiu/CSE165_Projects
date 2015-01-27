@@ -23,6 +23,7 @@ public:
     btRigidBody* rb;
     Vector3 m_color;
     float m_x;
+    float m_mat[16];
     float m_y;
     float m_z;
     Brick(Vector3 color);
