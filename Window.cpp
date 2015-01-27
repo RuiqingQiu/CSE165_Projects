@@ -42,11 +42,11 @@ void Window::reshapeCallback(int w, int h)
     glViewport(0, 0, w, h);  // set new viewport size
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    if(Globals::homework_num == 2){
-    gluPerspective(60.0, double(width)/(double)height, 1.0, 1000.0);// set perspective projection viewing frustum
-    glTranslatef(0, 0, Globals::camera->position.z);// move camera back 20 units so that it looks at the origin (or else it's in the origin)
-    }
-    else if(Globals::homework_num == 1){
+//    if(Globals::homework_num == 2){
+//    gluPerspective(60.0, double(width)/(double)height, 1.0, 1000.0);// set perspective projection viewing frustum
+//    glTranslatef(0, 0, Globals::camera->position.z);// move camera back 20 units so that it looks at the origin (or else it's in the origin)
+//    }
+//    else if(Globals::homework_num == 1){
         if (Window::width > Window::height)
         {
             //			glFrustum (-aspect, aspect, -1.0, 1.0, 1.0, 10000.0);
@@ -56,7 +56,7 @@ void Window::reshapeCallback(int w, int h)
         //			glFrustum (-1.0, 1.0, -aspect, aspect, 1.0, 10000.0);
             glFrustum (-double(width)/(double)height * 1, double(width)/(double)height * 1, -1, 1, 1, 1000);
         }
-    }
+    //}
     glMatrixMode(GL_MODELVIEW);
     
 }
@@ -236,12 +236,12 @@ void Window::draw2(){
     endTranslate();
     //Cube to indicate draw mode, red for no draw, green for draw
     startTranslate(10, 20, 0);
+    //Draw mode cube for indicating if it's in the draw mode
     if(listener.draw_mode){
         glColor3f(0, 1, 0);
     }
     else{
         glColor3f(1, 0, 0);
-
     }
     glutSolidCube(2);
     endTranslate();
@@ -251,6 +251,48 @@ void Window::draw2(){
     cursor.draw(Globals::camera->getMatrix()*world, cursor.radius);
     glLineWidth(2.5);
     
+    int last = 0;
+    bool linked = false;
+    if(listener.physics_start && listener.physics_state_changed){
+        for(int i = 0; i < listener.blist.size(); i++){
+            //If the point is an end point, then linked = false
+            if(listener.blist[i].m_x == 1000.0 || listener.blist[i].m_y == 1000.0 || listener.blist[i].m_z == 1000.0){
+                linked = false;
+            }
+            else if((abs(listener.blist[i].m_x) > 20 || abs(listener.blist[i].m_y) > 20 || abs(listener.blist[i].m_z) > 20)){
+                cout << "enter here" << endl;
+            }
+            else{
+                cout << listener.blist[i].m_x << " " << listener.blist[i].m_y << " " << listener.blist[i].m_z << endl;
+                listener.blist[i].physics(listener.blist[i].m_x, listener.blist[i].m_y, listener.blist[i].m_z, 0.5, 0.5);
+                if(linked){
+                    btGeneric6DofConstraint * joint6DOF;
+                    
+                    btTransform localA, localB, toground;
+                    
+                    bool useLinearReferenceFrameA = true;
+                    
+                    localA.setIdentity(); localB.setIdentity();
+                    
+                    localA.setOrigin(btVector3(listener.blist[last].m_x,listener.blist[last].m_y,listener.blist[last].m_z));
+                    
+                    localB.setOrigin(btVector3(listener.blist[i].m_x,listener.blist[i].m_y,listener.blist[i].m_z));
+                    joint6DOF = new btGeneric6DofConstraint(*listener.blist[last].rb, *listener.blist[i].rb, localA, localB,useLinearReferenceFrameA);
+
+                    joint6DOF->setLinearLowerLimit(btVector3(0,0,0));
+                    joint6DOF->setLinearUpperLimit(btVector3(0,0,0));
+                    joint6DOF->setAngularLowerLimit(btVector3(0,0,0));
+                    joint6DOF->setAngularUpperLimit(btVector3(0,0,0));
+
+                    Globals::dynamicsWorld->addConstraint(joint6DOF);
+                }
+                linked = true;
+                last = i;
+            }
+
+        }
+        listener.physics_state_changed = false;
+    }
     if(listener.sample_points.size() > 1){
         for(int i = 0; i < listener.sample_points.size()-1;i++){
             
@@ -262,31 +304,37 @@ void Window::draw2(){
             }
             //not a infinite point
             else{
-                glBegin(GL_LINES);
-                glColor3f(listener.corresponding_colors[i].x,listener.corresponding_colors[i].y,listener.corresponding_colors[i].z);
-                glVertex3f(listener.sample_points[i].x,listener.sample_points[i].y,listener.sample_points[i].z);
-                glVertex3f(listener.sample_points[i+1].x,listener.sample_points[i+1].y,listener.sample_points[i+1].z);
-                glEnd();
-                glPushMatrix();
-                glTranslatef(listener.sample_points[i].x, listener.sample_points[i].y, listener.sample_points[i].z);
-                glutSolidCube(1);
-                glPopMatrix();
+                if(listener.physics_start && !listener.physics_state_changed){
+                    if(listener.blist[i].m_x == 1000.0 || listener.blist[i].m_y == 1000.0 || listener.blist[i].m_z == 1000.0){
+                    }
+                    else if((abs(listener.blist[i].m_x) > 20 || abs(listener.blist[i].m_y) > 20 || abs(listener.blist[i].m_z) > 20)){
+                    }
+                    else{
+                        listener.blist[i].draw(world,0.5);
+                    }
+                }
+                else{
+                    glBegin(GL_LINES);
+                    glColor3f(listener.corresponding_colors[i].x,listener.corresponding_colors[i].y,listener.corresponding_colors[i].z);
+                    glVertex3f(listener.sample_points[i].x,listener.sample_points[i].y,listener.sample_points[i].z);
+                    glVertex3f(listener.sample_points[i+1].x,listener.sample_points[i+1].y,listener.sample_points[i+1].z);
+                    glEnd();
+                    glPushMatrix();
+                    glTranslatef(listener.sample_points[i].x, listener.sample_points[i].y, listener.sample_points[i].z);
+                    glutSolidCube(0.5);
+                    glPopMatrix();
+                }
             }
         }
     }
-
-//    for(int i = 0; i < listener.blist.size(); i++){
-//        listener.blist[i].draw(Globals::camera->getMatrix()*glmatrix*world, 2.0);
-//    }
-
 }
 void Window::draw3(){
 }
 void Window::displayCallback()
 {
     clock_t startTime = clock();
-
-    Globals::dynamicsWorld->stepSimulation(1 / 60.f, 10);
+    if(listener.physics_start)
+        Globals::dynamicsWorld->stepSimulation(1 / 60.f, 10);
     //Globals::softworld->stepSimulation(1.0f/60.f,0);
     //tmp.print_height();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // clear color and depth buffers
@@ -396,6 +444,9 @@ void Window::processSpecialKeys(int key, int x, int y){
 void Window::processNormalKeys(unsigned char key, int x, int y){
     if (key == 27){
         exit(0);
+    }
+    else if (key == '0'){
+        listener.physics_start = true;
     }
     else if(key == ' '){
         //physics_cleanup();

@@ -123,7 +123,7 @@ void LeapListener::onFrame(const Controller& controller) {
                     sample_points.push_back(Vector3(1000.0,1000.0,1000.0));
                     corresponding_colors.push_back(Vector3(1,1,1));
                 }
-
+                
                 draw_mode = false;
                 //Add a point to indicate the line is done
 
@@ -163,15 +163,14 @@ void LeapListener::onFrame(const Controller& controller) {
                                 x = x / 30;
                                 y = y / 30;
                                 z = z / 30;
-                                //pos.print("pushing pos");
-//                                pos.x = x;
-//                                pos.y = y;
-//                                pos.z = z;
                                 if(abs(x) > 50 || abs(y) > 50 || abs(z) > 50){
                                     
                                 }
                                 else{
                                     sample_points.push_back(Vector3(x,y,z));
+                                    Brick b = Brick(color);
+                                    b.setLocation(x, y, z);
+                                    blist.push_back(b);
                                     corresponding_colors.push_back(color);
                                 }
                                 count = 0;
@@ -242,17 +241,18 @@ void LeapListener::onFrame(const Controller& controller) {
           CircleGesture previousUpdate = CircleGesture(controller.frame(1).gesture(circle.id()));
           sweptAngle = (circle.progress() - previousUpdate.progress()) * 2 * PI;
         }
-        std::cout << std::string(2, ' ')
-                  << "Circle id: " << gesture.id()
-                  << ", state: " << stateNames[gesture.state()]
-                  << ", progress: " << circle.progress()
-                  << ", radius: " << circle.radius()
-                  << ", angle " << sweptAngle * RAD_TO_DEG
-                  <<  ", " << clockwiseness << std::endl;
+//        std::cout << std::string(2, ' ')
+//                  << "Circle id: " << gesture.id()
+//                  << ", state: " << stateNames[gesture.state()]
+//                  << ", progress: " << circle.progress()
+//                  << ", radius: " << circle.radius()
+//                  << ", angle " << sweptAngle * RAD_TO_DEG
+//                  <<  ", " << clockwiseness << std::endl;
         break;
       }
       case Gesture::TYPE_SWIPE:
       {
+        physics_start = true;
         SwipeGesture swipe = gesture;
         std::cout << std::string(2, ' ')
           << "Swipe id: " << gesture.id()

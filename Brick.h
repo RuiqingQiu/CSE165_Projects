@@ -22,6 +22,9 @@ public:
     MatrixTransform* world; //Position in the world
     btRigidBody* rb;
     Vector3 m_color;
+    float m_x;
+    float m_y;
+    float m_z;
     Brick(Vector3 color);
     void draw(Matrix4 C, float length);
     void setLocation(float x, float y, float z);

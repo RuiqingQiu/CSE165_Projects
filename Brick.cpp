@@ -52,6 +52,9 @@ void Brick::setLocation(float x, float y, float z){
     Matrix4 tmp = Matrix4();
     tmp.makeTranslate(x, y, z);
     world->M = world->M * tmp;
+    m_x = x;
+    m_y = y;
+    m_z = z;
 }
 
 
@@ -73,6 +76,7 @@ void Brick::physics(float x, float y, float z, float length, float m_mass){
     info.m_restitution = 0.5f;
     //info.m_friction = 1.5f;
     rb = new btRigidBody(info);
+    rb->setActivationState(DISABLE_DEACTIVATION);
     Globals::dynamicsWorld->addRigidBody(rb);
 }
 void Brick::print_height(){
