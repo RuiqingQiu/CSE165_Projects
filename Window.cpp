@@ -255,15 +255,18 @@ void Window::draw2(){
     bool linked = false;
     if(listener.physics_start && listener.physics_state_changed){
         for(int i = 0; i < listener.blist.size(); i++){
+            cout << listener.blist[i].m_x <<" " << listener.blist[i].m_y << " " <<listener.blist[i].m_z << endl;
+        }
+        for(int i = 0; i < listener.blist.size(); i++){
             //If the point is an end point, then linked = false
             if(listener.blist[i].m_x == 1000.0 || listener.blist[i].m_y == 1000.0 || listener.blist[i].m_z == 1000.0){
                 linked = false;
+                last = 0;
             }
             else if((abs(listener.blist[i].m_x) > 30 || abs(listener.blist[i].m_y) > 30 || abs(listener.blist[i].m_z) > 30)){
                 cout << "enter here" << endl;
             }
             else{
-                cout << listener.blist[i].m_x << " " << listener.blist[i].m_y << " " << listener.blist[i].m_z << endl;
                 listener.blist[i].physics(listener.blist[i].m_x, listener.blist[i].m_y, listener.blist[i].m_z, 0.5, 0.5);
                 if(linked){
                     btGeneric6DofConstraint * joint6DOF;
@@ -277,13 +280,14 @@ void Window::draw2(){
                     localA.setOrigin(btVector3(0,-0.5,0));
                     
                     localB.setOrigin(btVector3(0,0.5,0));
+                    cout << "last is " << last << endl;
+                    cout << "current is " << i << endl;
                     joint6DOF = new btGeneric6DofConstraint(*listener.blist[last].rb, *listener.blist[i].rb, localA, localB,useLinearReferenceFrameA);
 
                     joint6DOF->setLinearLowerLimit(btVector3(0,0,0));
                     joint6DOF->setLinearUpperLimit(btVector3(0,0,0));
                     //joint6DOF->setAngularLowerLimit(btVector3(0,0,0));
                     //joint6DOF->setAngularUpperLimit(btVector3(0,0,0));
-
                     Globals::dynamicsWorld->addConstraint(joint6DOF);
                 }
                 linked = true;
@@ -292,9 +296,39 @@ void Window::draw2(){
 
         }
         listener.physics_state_changed = false;
+    }//End of if for putting physics into the physics world
+    linked = false;
+    last = 0;
+    
+    if(listener.physics_start && !listener.physics_state_changed){
+        for(int i = 0; i < listener.blist.size();i++){
+            if(listener.blist[i].m_x == 1000.0 || listener.blist[i].m_y == 1000.0 || listener.blist[i].m_z == 1000.0){
+                linked = false;
+            }
+            else if((abs(listener.blist[i].m_x) > 30 || abs(listener.blist[i].m_y) > 30 || abs(listener.blist[i].m_z) > 30)){
+            }
+            else{
+                listener.blist[i].draw(world,0.5);
+                if(linked){
+                    glPushMatrix();
+                    glBegin(GL_LINES);
+                    glColor3f(0,1,0);
+                    //cout << listener.blist[last].m_x <<" " << listener.blist[last].m_y << " " <<listener.blist[last].m_z << endl;
+                    glVertex3f(listener.blist[last].m_x,listener.blist[last].m_y,listener.blist[last].m_z);
+                    glVertex3f(listener.blist[i].m_x,listener.blist[i].m_y,listener.blist[i].m_z);
+                    //cout << listener.blist[i].m_x <<" " << listener.blist[i].m_y << " " <<listener.blist[i].m_z << endl;
+                    glEnd();
+                    glPopMatrix();
+                    //cout << "in here" << endl;
+                }
+                linked = true;
+                last = i;
+            }
+        }
     }
-    if(listener.sample_points.size() > 1){
-        for(int i = 0; i < listener.sample_points.size()-1;i++){
+    else{
+        if(listener.sample_points.size() > 1){
+            for(int i = 0; i < listener.sample_points.size()-1;i++){
             
             //If the point is an end point
             if(listener.sample_points[i+1].x == 1000.0 || listener.sample_points[i+1].y == 1000.0 || listener.sample_points[i+1].z == 1000.0){
@@ -304,45 +338,18 @@ void Window::draw2(){
             }
             //not a infinite point
             else{
-                linked = false;
-                last = 0;
-                if(listener.physics_start && !listener.physics_state_changed){
-                    if(listener.blist[i].m_x == 1000.0 || listener.blist[i].m_y == 1000.0 || listener.blist[i].m_z == 1000.0){
-                        linked = false;
-                    }
-                    else if((abs(listener.blist[i].m_x) > 30 || abs(listener.blist[i].m_y) > 30 || abs(listener.blist[i].m_z) > 30)){
-                    }
-                    else{
-                        listener.blist[i].draw(world,0.5);
-                        if(linked){
-                            glPushMatrix();
-                            glBegin(GL_LINES);
-                            glColor3f(0,1,0);
-                            cout << listener.blist[last].m_x <<" " << listener.blist[last].m_y << " " <<listener.blist[last].m_z << endl;
-                            glVertex3f(listener.blist[last].m_x,listener.blist[last].m_y,listener.blist[last].m_z);
-                            glVertex3f(listener.blist[i].m_x,listener.blist[i].m_y,listener.blist[i].m_z);
-                            cout << listener.blist[i].m_x <<" " << listener.blist[i].m_y << " " <<listener.blist[i].m_z << endl;
-                            glEnd();
-                            glPopMatrix();
-                            cout << "in here" << endl;
-                        }
-                        linked = true;
-                        last = i;
-
-                    }
-                }
-                else{
-                    glBegin(GL_LINES);
-                    glColor3f(listener.corresponding_colors[i].x,listener.corresponding_colors[i].y,listener.corresponding_colors[i].z);
-                    glVertex3f(listener.sample_points[i].x,listener.sample_points[i].y,listener.sample_points[i].z);
-                    glVertex3f(listener.sample_points[i+1].x,listener.sample_points[i+1].y,listener.sample_points[i+1].z);
-                    glEnd();
-                    glPushMatrix();
-                    glTranslatef(listener.sample_points[i].x, listener.sample_points[i].y, listener.sample_points[i].z);
-                    glutSolidCube(0.5);
-                    glPopMatrix();
-                }
+                
+                glBegin(GL_LINES);
+                glColor3f(listener.corresponding_colors[i].x,listener.corresponding_colors[i].y,listener.corresponding_colors[i].z);
+                glVertex3f(listener.sample_points[i].x,listener.sample_points[i].y,listener.sample_points[i].z);
+                glVertex3f(listener.sample_points[i+1].x,listener.sample_points[i+1].y,listener.sample_points[i+1].z);
+                glEnd();
+                glPushMatrix();
+                glTranslatef(listener.sample_points[i].x, listener.sample_points[i].y, listener.sample_points[i].z);
+                glutSolidCube(0.5);
+                glPopMatrix();
             }
+        }
         }
     }
 }

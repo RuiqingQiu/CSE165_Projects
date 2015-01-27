@@ -121,6 +121,9 @@ void LeapListener::onFrame(const Controller& controller) {
             if(pinch == 0.0){
                 if(draw_mode == true){
                     sample_points.push_back(Vector3(1000.0,1000.0,1000.0));
+                    Brick b = Brick(Vector3(1,1,1));
+                    b.setLocation(1000.0, 1000.0, 1000.0);
+                    blist.push_back(b);
                     corresponding_colors.push_back(Vector3(1,1,1));
                 }
                 
