@@ -104,12 +104,12 @@ void LeapListener::onFrame(const Controller& controller) {
                     }
                 }
             }
-            index_pos.print("index");
-            thumb_pos.print("thumb");
-            cout << "distance :" << index_pos.distance(thumb_pos) << endl;
+            //index_pos.print("index");
+            //thumb_pos.print("thumb");
+            //cout << "distance :" << index_pos.distance(thumb_pos) << endl;
             
             if(index_pos.distance(thumb_pos) < 70){
-                physics_start = true;
+                //physics_start = true;
             }
         }
         if(hand.isLeft()){
@@ -159,10 +159,10 @@ void LeapListener::onFrame(const Controller& controller) {
                         y += pos.y;
                         z += pos.z;
                         if(draw_mode){
-                            if(count == 10){
-                                x = x / 10;
-                                y = y / 10;
-                                z = z / 10;
+                            if(count == 30){
+                                x = x / 30;
+                                y = y / 30;
+                                z = z / 30;
                                 if(abs(x) > 50 || abs(y) > 50 || abs(z) > 50){
                                     
                                 }

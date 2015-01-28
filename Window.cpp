@@ -226,7 +226,6 @@ void glLine(Vector3 start, Vector3 end, double const width, int const slices = 3
     GLUquadric *const quadric = gluNewQuadric();
     Vector3 z = Vector3(0,0,1);
     double const angle = acos(z.dot(z, d) / sqrt(d.dot(d, d) * z.dot(z, z)));
-    cout << angle << endl;
     z = d.cross(z, d);
     glTranslated(start.x, start.y, start.z);
     glRotated(angle * 180 / M_PI, z.x, z.y, z.z);
@@ -277,6 +276,8 @@ void Window::draw2(){
     
     int last = 0;
     bool linked = false;
+    
+    //This part is for setting up the physics
     if(listener.physics_start && listener.physics_state_changed){
         for(int i = 0; i < listener.blist.size(); i++){
             cout << listener.blist[i].m_x <<" " << listener.blist[i].m_y << " " <<listener.blist[i].m_z << endl;
@@ -318,7 +319,51 @@ void Window::draw2(){
                     joint6DOF->setLinearUpperLimit(btVector3(0,0,0));
                     //joint6DOF->setAngularLowerLimit(btVector3(0,0,0));
                     //joint6DOF->setAngularUpperLimit(btVector3(0,0,0));
-                    Globals::dynamicsWorld->addConstraint(joint6DOF);
+                   Globals::dynamicsWorld->addConstraint(joint6DOF);
+                }
+                //Enter else if the point is actually a initial draw point
+                else{
+                    //Find a point that is closest to it within some range
+                    Vector3 start = Vector3(listener.blist[i].m_x,listener.blist[i].m_y,listener.blist[i].m_z);
+                    float range = 20.0;
+                    float min = 1000.0;
+                    int snapping_point = -1;
+                    //Loop through the data and add all snapping points together with a constraint
+                    for(int j = 0; j < i; j++){
+                        Vector3 current = Vector3(listener.blist[j].m_x,listener.blist[j].m_y,listener.blist[j].m_z);
+                        float dist = start.distance(current);
+                        cout << "dist " << dist << endl;
+                        if(dist < min && dist < range){
+                            min = dist;
+                            snapping_point = j;
+                        }
+                    }
+                    //If some snapping point is found
+                    if(snapping_point != -1){
+                        btGeneric6DofConstraint * joint6DOF;
+                        
+                        btTransform localA, localB, toground;
+                        
+                        bool useLinearReferenceFrameA = true;
+                        
+                        localA.setIdentity(); localB.setIdentity();
+                        
+                        float y_dist = abs(listener.blist[snapping_point].m_y - listener.blist[i].m_y);
+                        cout << y_dist << endl;
+                        if(y_dist < 0.5){
+                            y_dist = 0.5;
+                        }
+                        localA.setOrigin(btVector3(0,-0.5,0));
+                        
+                        localB.setOrigin(btVector3(0,0.5,0));
+                        joint6DOF = new btGeneric6DofConstraint(*listener.blist[snapping_point].rb, *listener.blist[i].rb, localA, localB,useLinearReferenceFrameA);
+                        
+                        joint6DOF->setLinearLowerLimit(btVector3(0,0,0));
+                        joint6DOF->setLinearUpperLimit(btVector3(0,0,0));
+                        //joint6DOF->setAngularLowerLimit(btVector3(0,0,0));
+                        //joint6DOF->setAngularUpperLimit(btVector3(0,0,0));
+                        Globals::dynamicsWorld->addConstraint(joint6DOF);
+                    }
                 }
                 linked = true;
                 last = i;
@@ -326,6 +371,7 @@ void Window::draw2(){
 
         }
         listener.physics_state_changed = false;
+
     }//End of if for putting physics into the physics world
     linked = false;
     last = 0;
@@ -352,6 +398,26 @@ void Window::draw2(){
 //                    glPopMatrix();
                     //cout << "in here" << endl;
                 }
+                else{
+                    Vector3 start = Vector3(listener.blist[i].m_x,listener.blist[i].m_y,listener.blist[i].m_z);
+                    float range = 20.0;
+                    float min = 1000.0;
+                    int snapping_point = -1;
+                    //Loop through the data and add all snapping points together with a constraint
+                    for(int j = 0; j < i; j++){
+                        Vector3 current = Vector3(listener.blist[j].m_x,listener.blist[j].m_y,listener.blist[j].m_z);
+                        float dist = start.distance(current);
+                        if(dist < min && dist < range){
+                            min = dist;
+                            snapping_point = j;
+                        }
+                    }
+                    //If some snapping point is found
+                    if(snapping_point != -1){
+                        glLine(Vector3(listener.blist[snapping_point].m_x,listener.blist[snapping_point].m_y,listener.blist[snapping_point].m_z),Vector3(listener.blist[i].m_x,listener.blist[i].m_y,listener.blist[i].m_z),0.5,360);
+                        //cout << "enter here" << endl;
+                    }
+                }
                 linked = true;
                 last = i;
             }
@@ -359,17 +425,42 @@ void Window::draw2(){
     }
     else{
         if(listener.sample_points.size() > 1){
-            for(int i = 0; i < listener.sample_points.size()-1;i++){
+//            for(int i = 0; i < listener.sample_points.size(); i++){
+//                cout <<i << ": " << listener.sample_points[i].x << " " << listener.sample_points[i].y << " " << listener.sample_points[i].z << endl;
+//            }
+            for(int i = 1; i < listener.sample_points.size()-1;i++){
             
             //If the point is an end point
             if(listener.sample_points[i+1].x == 1000.0 || listener.sample_points[i+1].y == 1000.0 || listener.sample_points[i+1].z == 1000.0){
                 i++;
+                if(listener.sample_points.size()-1 > i){
+                    Vector3 start = Vector3(listener.blist[i+1].m_x,listener.blist[i+1].m_y,listener.blist[i+1].m_z);
+                    float range = 10.0;
+                    float min = 1000.0;
+                    int snapping_point = -1;
+                    //Loop through the data and add all snapping points together with a constraint
+                    for(int j = 0; j < i; j++){
+                            Vector3 current = Vector3(listener.blist[j].m_x,listener.blist[j].m_y,listener.blist[j].m_z);
+                            float dist = start.distance(current);
+                            if(dist < min && dist < range){
+                                min = dist;
+                                snapping_point = j;
+                            }
+                    }
+                    //If some snapping point is found
+                    if(snapping_point != -1){
+                        glLine(Vector3(listener.blist[i+1].m_x,listener.blist[i+1].m_y,listener.blist[i+1].m_z), Vector3(listener.blist[snapping_point].m_x,listener.blist[snapping_point].m_y,listener.blist[snapping_point].m_z),0.5,360);
+//                        cout << "snapping point " << snapping_point << endl;
+//                        cout << "start " << i+1 << endl;
+//                        cout << "enter here11111" << endl;
+                    }
+                }
+
             }
             else if((abs(listener.sample_points[i].x) > 30 || abs(listener.sample_points[i].y) > 30 || abs(listener.sample_points[i].z) > 30)){
             }
             //not a infinite point
             else{
-                
 //                glBegin(GL_LINES);
                 glColor3f(listener.corresponding_colors[i].x,listener.corresponding_colors[i].y,listener.corresponding_colors[i].z);
 //glVertex3f(listener.sample_points[i].x,listener.sample_points[i].y,listener.sample_points[i].z);
