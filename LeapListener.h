@@ -44,6 +44,7 @@ public:
     double x = 0.0;
     double y = 0.0;
     double z = 0.0;
+    int total_number_of_points = 0;
 private:
 };
 

@@ -14,6 +14,29 @@ Brick::Brick(Vector3 color){
     //world->addChild(piece);
     m_color = color;
 }
+
+void Brick::draw2(btTransform b){
+    if(m_y < 0.5){
+        glPushMatrix();
+        glMultMatrixf(m_mat);
+        glColor3f(m_color.getX(), m_color.getY(), m_color.getZ());
+        //glutSolidCube(length);
+        glPopMatrix();
+    }
+    else{
+        m_x = b.getOrigin().getX();
+        m_y = b.getOrigin().getY();
+        m_z = b.getOrigin().getZ();
+        float mat[16];
+        b.getOpenGLMatrix(mat);
+        for(int i = 0; i < 16; i++){
+            m_mat[i] = mat[i];
+        }
+        glColor3f(m_color.getX(), m_color.getY(), m_color.getZ());
+    }
+
+}
+
 void Brick::draw(Matrix4 C, float length){
     Matrix4 tmp = Matrix4();
     tmp.identity();
@@ -34,7 +57,7 @@ void Brick::draw(Matrix4 C, float length){
         glPushMatrix();
         glMultMatrixf(m_mat);
         glColor3f(m_color.getX(), m_color.getY(), m_color.getZ());
-        glutSolidCube(length);
+        //glutSolidCube(length);
         glPopMatrix();
     }
     else{
@@ -73,6 +96,12 @@ void Brick::setLocation(float x, float y, float z){
     m_z = z;
 }
 
+void Brick::setConnection(int c){
+    connection_index = c;
+}
+int Brick::getConnection(){
+    return connection_index;
+}
 
 void Brick::physics(float x, float y, float z, float length, float m_mass){
     btTransform t2;
@@ -85,7 +114,7 @@ void Brick::physics(float x, float y, float z, float length, float m_mass){
     btVector3 inertia(0,0,0);
     float mass = m_mass;
     box->calculateLocalInertia(mass,inertia);
-    
+    shape = box;
     btDefaultMotionState* MotionState =
     new btDefaultMotionState(t2);
     btRigidBody::btRigidBodyConstructionInfo info(mass,MotionState,box,inertia); //motion state would actually be non-null in most real usages
@@ -103,5 +132,11 @@ void Brick::print_height(){
     cout << "current height is " << trans.getOrigin().getY() << endl;
     cout << "current depth is " << trans.getOrigin().getZ() << endl;
 
+}
+bool Brick::isInfinite(){
+    if(m_x >= 1000.0 || m_y >=1000.0 || m_z >= 1000.0)
+        return true;
+    else
+        return false;
 }
 

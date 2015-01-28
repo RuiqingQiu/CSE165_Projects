@@ -38,6 +38,7 @@ namespace Globals
     int homework_num = 2;
     //LeapListener listener;
     int draw_mode = 0; // 0 for no draw, 1 for draw
+    btCompoundShape* compound;
 }
 
 //1 for homework 1
@@ -230,11 +231,11 @@ void loadShadowShader()
     GLhandleARB vertexShaderHandle;
     GLhandleARB fragmentShaderHandle;
     
-//    vertexShaderHandle   = loadShader("/Users/ruiqingqiu/Desktop/Qiu_Code/CSE165/CSE165 HW1/VertexShader",GL_VERTEX_SHADER);
-//    fragmentShaderHandle = loadShader("/Users/ruiqingqiu/Desktop/Qiu_Code/CSE165/CSE165 HW1/FragmentShader",GL_FRAGMENT_SHADER);
+    vertexShaderHandle   = loadShader("/Users/ruiqingqiu/Desktop/Qiu_Code/CSE165/CSE165 HW1/VertexShader",GL_VERTEX_SHADER);
+    fragmentShaderHandle = loadShader("/Users/ruiqingqiu/Desktop/Qiu_Code/CSE165/CSE165 HW1/FragmentShader",GL_FRAGMENT_SHADER);
     
-    vertexShaderHandle   = loadShader("/Users/margaretwm3/Dropbox/CSE165/CSE165_Projects/VertexShader",GL_VERTEX_SHADER);
-    fragmentShaderHandle = loadShader("/Users/margaretwm3/Dropbox/CSE165/CSE165_Projects/FragmentShader",GL_FRAGMENT_SHADER);
+//    vertexShaderHandle   = loadShader("/Users/margaretwm3/Dropbox/CSE165/CSE165_Projects/VertexShader",GL_VERTEX_SHADER);
+//    fragmentShaderHandle = loadShader("/Users/margaretwm3/Dropbox/CSE165/CSE165_Projects/FragmentShader",GL_FRAGMENT_SHADER);
 
     
     Globals::shadowShaderId = glCreateProgramObjectARB();

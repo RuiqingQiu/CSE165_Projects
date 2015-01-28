@@ -50,5 +50,6 @@ public:
     static void draw3();
     static Cursor cursor;
     static LeapListener listener;
+    static void start_physics();
 };
 #endif /* defined(__CSE167_Final_Project__Window__) */

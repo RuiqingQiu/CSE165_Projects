@@ -233,6 +233,76 @@ void glLine(Vector3 start, Vector3 end, double const width, int const slices = 3
     glPopMatrix();
     gluDeleteQuadric(quadric);
 }
+void Window::start_physics(){
+    int last = 0;
+    int count = 0;
+    Globals::compound = new btCompoundShape();
+    for(int i = 1; i < listener.blist.size()-1;i++){
+        if(listener.blist[i].m_x >= 1000.0 || listener.blist[i].m_y >= 1000.0 || listener.blist[i].m_z >= 1000.0){
+            btTransform trans;
+            trans.setIdentity();
+            trans.setOrigin(btVector3(1000,1000,1000));
+            btCollisionShape* tmp = new btSphereShape(0.5f);
+            Globals::compound->addChildShape(trans, tmp);
+            count++;
+        }
+        else{
+            listener.blist[i].physics(listener.blist[i].m_x, listener.blist[i].m_y, listener.blist[i].m_z, 0.5, 0.1);
+            btTransform trans;
+            trans.setIdentity();
+            trans.setOrigin(btVector3(listener.blist[i].m_x, listener.blist[i].m_y, listener.blist[i].m_z));
+            btCollisionShape* tmp = listener.blist[i].shape;
+            Globals::compound->addChildShape(trans, tmp);
+            count++;
+            if(listener.blist[i].getConnection() == -1){
+                last = i;
+            }
+            else{
+                int connect_index = listener.blist[i].getConnection();
+                //create constraint
+                if(i != last){
+                    btFixedConstraint * joint6DOF;
+                    
+                    btTransform localA, localB, toground;
+                    
+                    bool useLinearReferenceFrameA = true;
+                    
+                    localA.setIdentity(); localB.setIdentity();
+                    
+                    float y_dist = abs(listener.blist[connect_index].m_y - listener.blist[i].m_y);
+                    cout << y_dist << endl;
+                    if(y_dist < 0.5){
+                        y_dist = 0.5;
+                    }
+                    localA.setOrigin(btVector3(0,-y_dist,0));
+                    
+                    localB.setOrigin(btVector3(0,y_dist,0));
+                    cout << "last is " << last << endl;
+                    cout << "current is " << i << endl;
+                    btTransform frameInA;
+                    listener.blist[connect_index].rb->getMotionState()->getWorldTransform(frameInA);
+                    btTransform frameInB;
+                    listener.blist[i].rb->getMotionState()->getWorldTransform(frameInB);
+                    joint6DOF = new btFixedConstraint(*listener.blist[connect_index].rb, *listener.blist[i].rb,
+                                                      frameInA,frameInB
+                                                      );
+                    
+                    //joint6DOF = new btGeneric6DofConstraint(*listener.blist[last].rb, *listener.blist[i].rb, localA, localB,useLinearReferenceFrameA);
+                    
+                    //joint6DOF->setLinearLowerLimit(btVector3(0,0,0));
+                    //joint6DOF->setLinearUpperLimit(btVector3(0,0,0));
+                    //joint6DOF->setAngularLowerLimit(btVector3(0,0,0));
+                    //joint6DOF->setAngularUpperLimit(btVector3(0,0,0));
+                    Globals::dynamicsWorld->addConstraint(joint6DOF);
+                    last = i;
+                }
+            }
+        }
+    }
+    listener.physics_state_changed = false;
+    //Need to add shape to world
+    cout << "physics compund shape contains: " << count << endl;
+}
 void Window::draw2(){
     
     glColor4f(0.3f,0.3f,0.3f,1);
@@ -260,6 +330,7 @@ void Window::draw2(){
     glutSolidCube(2);
     endTranslate();
     startTranslate(15, 20, 0);
+    //Drawing cube for indicating physics start
     if(listener.physics_start){
         glColor3f(0, 1, 0);
     }
@@ -269,6 +340,7 @@ void Window::draw2(){
     glutSolidCube(2);
     endTranslate();
     startTranslate(-5, 20, 0);
+    //Drawing cube to indicate color mode start
     if(listener.color_mode){
         glColor3f(0, 1, 0);
     }
@@ -284,218 +356,40 @@ void Window::draw2(){
     
     int last = 0;
     bool linked = false;
-    
+    //    for(int i = 0; i < listener.blist.size();i++){
+    //        cout << i << ": " << listener.blist[i].m_x << " " << listener.blist[i].m_y << " " << listener.blist[i].m_z << endl;
+    //    }
     //This part is for setting up the physics
     if(listener.physics_start && listener.physics_state_changed){
-        for(int i = 0; i < listener.blist.size(); i++){
-            cout << listener.blist[i].m_x <<" " << listener.blist[i].m_y << " " <<listener.blist[i].m_z << endl;
-        }
-        for(int i = 0; i < listener.blist.size(); i++){
-            //If the point is an end point, then linked = false
-            if(listener.blist[i].m_x == 1000.0 || listener.blist[i].m_y == 1000.0 || listener.blist[i].m_z == 1000.0){
-                linked = false;
-                last = 0;
-            }
-            else if((abs(listener.blist[i].m_x) > 30 || abs(listener.blist[i].m_y) > 30 || abs(listener.blist[i].m_z) > 30)){
-                cout << "enter here" << endl;
-            }
-            else{
-                int a = rand() / 2;
-                listener.blist[i].physics(listener.blist[i].m_x, listener.blist[i].m_y, listener.blist[i].m_z, 0.5, 1);
-                if(linked){
-                    //btGeneric6DofConstraint * joint6DOF;
-                    btFixedConstraint * joint6DOF;
-
-                    btTransform localA, localB, toground;
-                    
-                    bool useLinearReferenceFrameA = true;
-                    
-                    localA.setIdentity(); localB.setIdentity();
-                    
-                    float y_dist = abs(listener.blist[last].m_y - listener.blist[i].m_y);
-                    cout << y_dist << endl;
-                    if(y_dist < 0.5){
-                        y_dist = 0.5;
-                    }
-                    localA.setOrigin(btVector3(0,-y_dist,0));
-                    
-                    localB.setOrigin(btVector3(0,y_dist,0));
-                    cout << "last is " << last << endl;
-                    cout << "current is " << i << endl;
-                    btTransform frameInA = btTransform(btQuaternion(btVector3(0,1,0), 10.0));
-                    btTransform frameInB = btTransform(btQuaternion(btVector3(0,1,0), 10.0));
-                    joint6DOF = new btFixedConstraint(*listener.blist[last].rb, *listener.blist[i].rb,
-                                                      frameInA,frameInB
-                                                      );
-
-                    //joint6DOF = new btGeneric6DofConstraint(*listener.blist[last].rb, *listener.blist[i].rb, localA, localB,useLinearReferenceFrameA);
-
-                    //joint6DOF->setLinearLowerLimit(btVector3(0,0,0));
-                    //joint6DOF->setLinearUpperLimit(btVector3(0,0,0));
-                    //joint6DOF->setAngularLowerLimit(btVector3(0,0,0));
-                    //joint6DOF->setAngularUpperLimit(btVector3(0,0,0));
-                   Globals::dynamicsWorld->addConstraint(joint6DOF);
-                }
-                //Enter else if the point is actually a initial draw point
-                else{
-                    //Find a point that is closest to it within some range
-                    Vector3 start = Vector3(listener.blist[i].m_x,listener.blist[i].m_y,listener.blist[i].m_z);
-                    float range = 20.0;
-                    float min = 1000.0;
-                    int snapping_point = -1;
-                    //Loop through the data and add all snapping points together with a constraint
-                    for(int j = 0; j < i; j++){
-                        Vector3 current = Vector3(listener.blist[j].m_x,listener.blist[j].m_y,listener.blist[j].m_z);
-                        float dist = start.distance(current);
-                        cout << "dist " << dist << endl;
-                        if(dist < min && dist < range){
-                            min = dist;
-                            snapping_point = j;
-                        }
-                    }
-                    //If some snapping point is found
-                    if(snapping_point != -1){
-                        //btGeneric6DofConstraint * joint6DOF;
-                        btFixedConstraint * joint6DOF;
-
-                        btTransform localA, localB, toground;
-                        
-                        bool useLinearReferenceFrameA = true;
-                        
-                        localA.setIdentity(); localB.setIdentity();
-                        
-                        float y_dist = abs(listener.blist[snapping_point].m_y - listener.blist[i].m_y);
-                        cout << y_dist << endl;
-                        if(y_dist < 0.5){
-                            y_dist = 0.5;
-                        }
-                        localA.setOrigin(btVector3(0,-0.5,0));
-                        
-                        localB.setOrigin(btVector3(0,0.5,0));
-                        //joint6DOF = new btGeneric6DofConstraint(*listener.blist[snapping_point].rb, *listener.blist[i].rb, localA, localB,useLinearReferenceFrameA);
-                        
-                        btTransform frameInA;
-                        listener.blist[snapping_point].rb->getMotionState()->getWorldTransform(frameInA);
-                        btTransform frameInB;
-                        listener.blist[i].rb->getMotionState()->getWorldTransform(frameInB);;
-                        joint6DOF = new btFixedConstraint(*listener.blist[snapping_point].rb, *listener.blist[i].rb,
-                                          frameInA,frameInB
-                                          );
-                        //joint6DOF->setLinearLowerLimit(btVector3(0,0,0));
-                        //joint6DOF->setLinearUpperLimit(btVector3(0,0,0));
-                        //joint6DOF->setAngularLowerLimit(btVector3(0,0,0));
-                        //joint6DOF->setAngularUpperLimit(btVector3(0,0,0));
-                        Globals::dynamicsWorld->addConstraint(joint6DOF);
-                    }
-                }
-                linked = true;
-                last = i;
-            }
-
-        }
-        listener.physics_state_changed = false;
-
+        start_physics();
     }//End of if for putting physics into the physics world
-    linked = false;
-    last = 0;
-    
-    if(listener.physics_start && !listener.physics_state_changed){
-        for(int i = 0; i < listener.blist.size();i++){
-            if(listener.blist[i].m_x == 1000.0 || listener.blist[i].m_y == 1000.0 || listener.blist[i].m_z == 1000.0){
-                linked = false;
-            }
-            else if((abs(listener.blist[i].m_x) > 30 || abs(listener.blist[i].m_y) > 30 || abs(listener.blist[i].m_z) > 30)){
-            }
-            else{
-                listener.blist[i].draw(world,0.5);
-                if(linked){
-                    glLine(Vector3(listener.blist[last].m_x,listener.blist[last].m_y,listener.blist[last].m_z),Vector3(listener.blist[i].m_x,listener.blist[i].m_y,listener.blist[i].m_z),0.5,360);
-//                    glPushMatrix();
-//                    glBegin(GL_LINES);
-//                    glColor3f(0,1,0);
-//                    //cout << listener.blist[last].m_x <<" " << listener.blist[last].m_y << " " <<listener.blist[last].m_z << endl;
-//                    glVertex3f(listener.blist[last].m_x,listener.blist[last].m_y,listener.blist[last].m_z);
-//                    glVertex3f(listener.blist[i].m_x,listener.blist[i].m_y,listener.blist[i].m_z);
-//                    //cout << listener.blist[i].m_x <<" " << listener.blist[i].m_y << " " <<listener.blist[i].m_z << endl;
-//                    glEnd();
-//                    glPopMatrix();
-                    //cout << "in here" << endl;
+    //This else statement is for when the physics is not starting yet, using opengl to draw with static points
+    else{
+        if(listener.blist.size() > 1){
+            int last = 1;
+            for(int i = 1; i < listener.blist.size()-1;i++){
+                if(listener.blist[i].m_x >= 1000.0 || listener.blist[i].m_y >= 1000.0 || listener.blist[i].m_z >= 1000.0){
                 }
                 else{
-                    Vector3 start = Vector3(listener.blist[i].m_x,listener.blist[i].m_y,listener.blist[i].m_z);
-                    float range = 20.0;
-                    float min = 1000.0;
-                    int snapping_point = -1;
-                    //Loop through the data and add all snapping points together with a constraint
-                    for(int j = 0; j < i; j++){
-                        Vector3 current = Vector3(listener.blist[j].m_x,listener.blist[j].m_y,listener.blist[j].m_z);
-                        float dist = start.distance(current);
-                        if(dist < min && dist < range){
-                            min = dist;
-                            snapping_point = j;
+                    if(listener.physics_start && !listener.physics_state_changed){
+                        //Draw here is to update the location that stored in brick
+                        cout << i << endl;
+                        listener.blist[i].draw(world, 0.5);
+                        //listener.blist[i].draw2(Globals::compound->getChildTransform(i-1));
+                        
+                    }
+                    if(listener.blist[i].getConnection() == -1)
+                        last = i;
+                    else{
+                        Brick connect = listener.blist[listener.blist[i].getConnection()];
+                        if(i != last){
+                            glColor3f(listener.blist[i].m_color.x,listener.blist[i].m_color.y,listener.blist[i].m_color.z);
+                            glLine(Vector3(connect.m_x, connect.m_y, connect.m_z),Vector3(listener.blist[i].m_x,listener.blist[i].m_y,listener.blist[i].m_z),0.5,360);
+                            last = i;
                         }
                     }
-                    //If some snapping point is found
-                    if(snapping_point != -1){
-                        glLine(Vector3(listener.blist[snapping_point].m_x,listener.blist[snapping_point].m_y,listener.blist[snapping_point].m_z),Vector3(listener.blist[i].m_x,listener.blist[i].m_y,listener.blist[i].m_z),0.5,360);
-                        //cout << "enter here" << endl;
-                    }
                 }
-                linked = true;
-                last = i;
             }
-        }
-    }
-    else{
-        if(listener.sample_points.size() > 1){
-//            for(int i = 0; i < listener.sample_points.size(); i++){
-//                cout <<i << ": " << listener.sample_points[i].x << " " << listener.sample_points[i].y << " " << listener.sample_points[i].z << endl;
-//            }
-            for(int i = 1; i < listener.sample_points.size()-1;i++){
-            
-            //If the point is an end point
-            if(listener.sample_points[i+1].x == 1000.0 || listener.sample_points[i+1].y == 1000.0 || listener.sample_points[i+1].z == 1000.0){
-                i++;
-                if(listener.sample_points.size()-1 > i){
-                    Vector3 start = Vector3(listener.blist[i+1].m_x,listener.blist[i+1].m_y,listener.blist[i+1].m_z);
-                    float range = 10.0;
-                    float min = 1000.0;
-                    int snapping_point = -1;
-                    //Loop through the data and add all snapping points together with a constraint
-                    for(int j = 0; j < i; j++){
-                            Vector3 current = Vector3(listener.blist[j].m_x,listener.blist[j].m_y,listener.blist[j].m_z);
-                            float dist = start.distance(current);
-                            if(dist < min && dist < range){
-                                min = dist;
-                                snapping_point = j;
-                            }
-                    }
-                    //If some snapping point is found
-                    if(snapping_point != -1){
-                        glLine(Vector3(listener.blist[i+1].m_x,listener.blist[i+1].m_y,listener.blist[i+1].m_z), Vector3(listener.blist[snapping_point].m_x,listener.blist[snapping_point].m_y,listener.blist[snapping_point].m_z),0.5,360);
-//                        cout << "snapping point " << snapping_point << endl;
-//                        cout << "start " << i+1 << endl;
-//                        cout << "enter here11111" << endl;
-                    }
-                }
-
-            }
-            else if((abs(listener.sample_points[i].x) > 30 || abs(listener.sample_points[i].y) > 30 || abs(listener.sample_points[i].z) > 30)){
-            }
-            //not a infinite point
-            else{
-//                glBegin(GL_LINES);
-                glColor3f(listener.corresponding_colors[i].x,listener.corresponding_colors[i].y,listener.corresponding_colors[i].z);
-//glVertex3f(listener.sample_points[i].x,listener.sample_points[i].y,listener.sample_points[i].z);
-//                glVertex3f(listener.sample_points[i+1].x,listener.sample_points[i+1].y,listener.sample_points[i+1].z);
-//                glEnd();
-                glLine(Vector3(listener.sample_points[i].x,listener.sample_points[i].y,listener.sample_points[i].z),Vector3(listener.sample_points[i+1].x,listener.sample_points[i+1].y,listener.sample_points[i+1].z),0.5,360);
-//                glPushMatrix();
-//                glTranslatef(listener.sample_points[i].x, listener.sample_points[i].y, listener.sample_points[i].z);
-//                glutSolidCube(0.5);
-//                glPopMatrix();
-            }
-        }
         }
     }
 }
@@ -514,8 +408,6 @@ void Window::displayCallback()
         draw();
     }
     else if(Globals::homework_num == 2){
-       
-
         //draw2();
         //First step: Render from the light POV to a FBO, story depth values only
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,Globals::fboId);	//Rendering offscreen
@@ -525,7 +417,7 @@ void Window::displayCallback()
         
         // In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
         glViewport(0,0,Window::width * 4,Window::height* 4);
-        
+
         // Clear previous frame values
         glClear(GL_DEPTH_BUFFER_BIT);
         

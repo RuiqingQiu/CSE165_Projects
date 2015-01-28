@@ -14,6 +14,9 @@ const std::string stateNames[] = {"STATE_INVALID", "STATE_START", "STATE_UPDATE"
 
 void LeapListener::onInit(const Controller& controller) {
   std::cout << "Initialized" << std::endl;
+    Brick b = Brick(Vector3(1,1,1));
+    b.setLocation(1000.0, 1000.0, 1000.0);
+    blist.push_back(b);
 }
 
 void LeapListener::onConnect(const Controller& controller) {
@@ -116,12 +119,14 @@ void LeapListener::onFrame(const Controller& controller) {
             float pinch = hand.pinchStrength();
             //cout << pinch << endl;
             if(pinch == 0.0){
+                //End point reached, put a infinite point to indicate end
                 if(draw_mode == true){
                     sample_points.push_back(Vector3(1000.0,1000.0,1000.0));
                     Brick b = Brick(Vector3(1,1,1));
                     b.setLocation(1000.0, 1000.0, 1000.0);
                     blist.push_back(b);
                     corresponding_colors.push_back(Vector3(1,1,1));
+                    total_number_of_points++;
                 }
                 
                 draw_mode = false;
@@ -163,16 +168,60 @@ void LeapListener::onFrame(const Controller& controller) {
                                 x = x / 30;
                                 y = y / 30;
                                 z = z / 30;
-                                if(abs(x) > 50 || abs(y) > 50 || abs(z) > 50){
-                                    
+                                if(abs(x) > 30 || abs(y) > 30 || abs(z) > 30){
+                        
                                 }
                                 else{
+                                    //If physics didn't start, then we can still draw more
                                     if(!physics_start){
-                                        sample_points.push_back(Vector3(x,y,z));
-                                        Brick b = Brick(color);
-                                        b.setLocation(x, y, z);
-                                        blist.push_back(b);
-                                        corresponding_colors.push_back(color);
+                                        
+                                        //Check 1, we need the starting point be connect to something or on the floor, otherwise, don't draw
+                                        if(blist.size() > 0 && blist[total_number_of_points].isInfinite()){
+                                            //If it's infinite, then we need it to within range of some end points
+                                            cout << "1111111" << endl;
+                                            if(y < 2){
+                                                sample_points.push_back(Vector3(x,y,z));
+                                                total_number_of_points++;
+                                                Brick b = Brick(color);
+                                                b.setLocation(x, y, z);
+                                                blist.push_back(b);
+                                                corresponding_colors.push_back(color);
+                                            }
+                                            //Else, we need to find a good connecting points for it.
+                                            else{
+                                                Vector3 start = Vector3(x,y,z);
+                                                float min = 1000;
+                                                float range = 5;
+                                                int snapping_point = -1;
+                                                for(int i = 0; i < total_number_of_points; i++){
+                                                    Vector3 current = Vector3(blist[i].m_x,blist[i].m_y,blist[i].m_z);
+                                                    float dist = start.distance(current);
+                                                    if(dist < min && dist < range){
+                                                        min = dist;
+                                                        snapping_point = i;
+                                                    }
+                                                }
+                                                if(snapping_point != -1){
+                                                    sample_points.push_back(Vector3(x,y,z));
+                                                    total_number_of_points++;
+                                                    Brick b = Brick(color);
+                                                    b.setLocation(x, y, z);
+                                                    b.setConnection(snapping_point);
+                                                    blist.push_back(b);
+                                                    corresponding_colors.push_back(color);
+                                                }
+                                            }
+                                        }
+                                        //If the point previously is not a infinite point, meaning it's still drawing
+                                        else{
+                                            sample_points.push_back(Vector3(x,y,z));
+                                            Brick b = Brick(color);
+                                            b.setLocation(x, y, z);
+                                            b.setConnection(total_number_of_points);
+                                            blist.push_back(b);
+                                            corresponding_colors.push_back(color);
+                                            total_number_of_points++;
+                                        }
                                     }
                                 }
                                 count = 0;
@@ -258,31 +307,31 @@ void LeapListener::onFrame(const Controller& controller) {
       case Gesture::TYPE_SWIPE:
       {
         SwipeGesture swipe = gesture;
-        std::cout << std::string(2, ' ')
-          << "Swipe id: " << gesture.id()
-          << ", state: " << stateNames[gesture.state()]
-          << ", direction: " << swipe.direction()
-          << ", speed: " << swipe.speed() << std::endl;
+//        std::cout << std::string(2, ' ')
+//          << "Swipe id: " << gesture.id()
+//          << ", state: " << stateNames[gesture.state()]
+//          << ", direction: " << swipe.direction()
+//          << ", speed: " << swipe.speed() << std::endl;
         break;
       }
       case Gesture::TYPE_KEY_TAP:
       {
         KeyTapGesture tap = gesture;
-        std::cout << std::string(2, ' ')
-          << "Key Tap id: " << gesture.id()
-          << ", state: " << stateNames[gesture.state()]
-          << ", position: " << tap.position()
-          << ", direction: " << tap.direction()<< std::endl;
+//        std::cout << std::string(2, ' ')
+//          << "Key Tap id: " << gesture.id()
+//          << ", state: " << stateNames[gesture.state()]
+//          << ", position: " << tap.position()
+//          << ", direction: " << tap.direction()<< std::endl;
         break;
       }
       case Gesture::TYPE_SCREEN_TAP:
       {
         ScreenTapGesture screentap = gesture;
-        std::cout << std::string(2, ' ')
-          << "Screen Tap id: " << gesture.id()
-          << ", state: " << stateNames[gesture.state()]
-          << ", position: " << screentap.position()
-          << ", direction: " << screentap.direction()<< std::endl;
+//        std::cout << std::string(2, ' ')
+//          << "Screen Tap id: " << gesture.id()
+//          << ", state: " << stateNames[gesture.state()]
+//          << ", position: " << screentap.position()
+//          << ", direction: " << screentap.direction()<< std::endl;
         break;
       }
       default:

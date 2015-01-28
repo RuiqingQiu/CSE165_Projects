@@ -43,6 +43,7 @@ namespace Globals
     extern int homework_num;
     //extern LeapListener listener;
     extern int draw_mode;
+    extern btCompoundShape* compound;
 };
 void physics_setup();
 void physics_cleanup();
