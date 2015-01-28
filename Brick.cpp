@@ -93,6 +93,7 @@ void Brick::physics(float x, float y, float z, float length, float m_mass){
     //info.m_friction = 1.5f;
     rb = new btRigidBody(info);
     rb->setActivationState(DISABLE_DEACTIVATION);
+    //rb->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
     Globals::dynamicsWorld->addRigidBody(rb);
 }
 void Brick::print_height(){
