@@ -293,10 +293,11 @@ void Window::draw2(){
             }
             else{
                 int a = rand() / 2;
-                listener.blist[i].physics(listener.blist[i].m_x, listener.blist[i].m_y, listener.blist[i].m_z, 0.5, a);
+                listener.blist[i].physics(listener.blist[i].m_x, listener.blist[i].m_y, listener.blist[i].m_z, 0.5, 1);
                 if(linked){
-                    btGeneric6DofConstraint * joint6DOF;
-                    
+                    //btGeneric6DofConstraint * joint6DOF;
+                    btFixedConstraint * joint6DOF;
+
                     btTransform localA, localB, toground;
                     
                     bool useLinearReferenceFrameA = true;
@@ -313,10 +314,16 @@ void Window::draw2(){
                     localB.setOrigin(btVector3(0,y_dist,0));
                     cout << "last is " << last << endl;
                     cout << "current is " << i << endl;
-                    joint6DOF = new btGeneric6DofConstraint(*listener.blist[last].rb, *listener.blist[i].rb, localA, localB,useLinearReferenceFrameA);
+                    btTransform frameInA = btTransform(btQuaternion(btVector3(0,1,0), 10.0));
+                    btTransform frameInB = btTransform(btQuaternion(btVector3(0,1,0), 10.0));
+                    joint6DOF = new btFixedConstraint(*listener.blist[last].rb, *listener.blist[i].rb,
+                                                      frameInA,frameInB
+                                                      );
 
-                    joint6DOF->setLinearLowerLimit(btVector3(0,0,0));
-                    joint6DOF->setLinearUpperLimit(btVector3(0,0,0));
+                    //joint6DOF = new btGeneric6DofConstraint(*listener.blist[last].rb, *listener.blist[i].rb, localA, localB,useLinearReferenceFrameA);
+
+                    //joint6DOF->setLinearLowerLimit(btVector3(0,0,0));
+                    //joint6DOF->setLinearUpperLimit(btVector3(0,0,0));
                     //joint6DOF->setAngularLowerLimit(btVector3(0,0,0));
                     //joint6DOF->setAngularUpperLimit(btVector3(0,0,0));
                    Globals::dynamicsWorld->addConstraint(joint6DOF);
@@ -340,8 +347,9 @@ void Window::draw2(){
                     }
                     //If some snapping point is found
                     if(snapping_point != -1){
-                        btGeneric6DofConstraint * joint6DOF;
-                        
+                        //btGeneric6DofConstraint * joint6DOF;
+                        btFixedConstraint * joint6DOF;
+
                         btTransform localA, localB, toground;
                         
                         bool useLinearReferenceFrameA = true;
@@ -356,10 +364,17 @@ void Window::draw2(){
                         localA.setOrigin(btVector3(0,-0.5,0));
                         
                         localB.setOrigin(btVector3(0,0.5,0));
-                        joint6DOF = new btGeneric6DofConstraint(*listener.blist[snapping_point].rb, *listener.blist[i].rb, localA, localB,useLinearReferenceFrameA);
+                        //joint6DOF = new btGeneric6DofConstraint(*listener.blist[snapping_point].rb, *listener.blist[i].rb, localA, localB,useLinearReferenceFrameA);
                         
-                        joint6DOF->setLinearLowerLimit(btVector3(0,0,0));
-                        joint6DOF->setLinearUpperLimit(btVector3(0,0,0));
+                        btTransform frameInA;
+                        listener.blist[snapping_point].rb->getMotionState()->getWorldTransform(frameInA);
+                        btTransform frameInB;
+                        listener.blist[i].rb->getMotionState()->getWorldTransform(frameInB);;
+                        joint6DOF = new btFixedConstraint(*listener.blist[snapping_point].rb, *listener.blist[i].rb,
+                                          frameInA,frameInB
+                                          );
+                        //joint6DOF->setLinearLowerLimit(btVector3(0,0,0));
+                        //joint6DOF->setLinearUpperLimit(btVector3(0,0,0));
                         //joint6DOF->setAngularLowerLimit(btVector3(0,0,0));
                         //joint6DOF->setAngularUpperLimit(btVector3(0,0,0));
                         Globals::dynamicsWorld->addConstraint(joint6DOF);
