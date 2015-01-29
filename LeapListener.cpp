@@ -136,7 +136,25 @@ void LeapListener::onFrame(const Controller& controller) {
                     b.setLocation(1000.0, 1000.0, 1000.0);
                     blist.push_back(b);
                     corresponding_colors.push_back(Vector3(1,1,1));
+                    //Find a connecting point for current line if within range to snap onto end point
+                    Vector3 start = Vector3(blist[total_number_of_points-1].m_x,blist[total_number_of_points-1].m_y,blist[total_number_of_points-1].m_z);
+                    float min = 1000;
+                    float range = 20;
+                    int snapping_point = -1;
+                    for(int i = 0; i < last_stroke_points; i++){
+                        Vector3 current = Vector3(blist[i].m_x,blist[i].m_y,blist[i].m_z);
+                        float dist = start.distance(current);
+                        if(dist < min && dist < range){
+                            min = dist;
+                            snapping_point = i;
+                        }
+                    }
+                    if(snapping_point != -1){
+                        cout << "set connection" << snapping_point << endl;
+                        blist[total_number_of_points].setConnection(snapping_point);
+                    }
                     total_number_of_points++;
+                    last_stroke_points = total_number_of_points;
                 }
                 
                 draw_mode = false;
@@ -281,7 +299,7 @@ void LeapListener::onFrame(const Controller& controller) {
                     }
                 }
         }
-        if(hand.isRight() && finger.type() == finger.TYPE_THUMB && finger.isExtended()){
+        if(hand.isRight()&& finger.isExtended()){
             extendedFingers++;
         }
     }
@@ -292,7 +310,6 @@ void LeapListener::onFrame(const Controller& controller) {
         physics_start = true;
         draw_mode = false;
     }
-    cout << "extended fingers: " << extendedFingers << endl;
     if(extendedFingers == 1){
         color_mode = true;
     }
