@@ -281,7 +281,7 @@ void LeapListener::onFrame(const Controller& controller) {
                     }
                 }
         }
-        if(hand.isRight() && finger.isExtended()){
+        if(hand.isRight() && finger.type() == finger.TYPE_THUMB && finger.isExtended()){
             extendedFingers++;
         }
     }
@@ -293,7 +293,7 @@ void LeapListener::onFrame(const Controller& controller) {
         draw_mode = false;
     }
     cout << "extended fingers: " << extendedFingers << endl;
-    if(extendedFingers == 0){
+    if(extendedFingers == 1){
         color_mode = true;
     }
     else{
