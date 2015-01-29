@@ -49,11 +49,14 @@ void LeapListener::onFrame(const Controller& controller) {
   HandList hands = frame.hands();
     float left_y = 0.0;
     float right_y = 0.0;
+    int extendedFingers = 0;
+
   for (HandList::const_iterator hl = hands.begin(); hl != hands.end(); ++hl)
   {
     // Get the first hand
     const Hand hand = *hl;
     std::string handType = hand.isLeft() ? "Left hand" : "Right hand";
+
     //std::cout << std::string(2, ' ') << handType << ", id: " << hand.id()
       //        << ", palm position: " << hand.palmPosition() << std::endl;
     // Get the hand's normal vector and direction
@@ -278,12 +281,23 @@ void LeapListener::onFrame(const Controller& controller) {
                     }
                 }
         }
+        if(hand.isRight() && finger.isExtended()){
+            extendedFingers++;
+        }
     }
   }
-
+    
+    //If two hands face up, then physics start
     if(left_y > 0 && right_y > 0){
         physics_start = true;
         draw_mode = false;
+    }
+    cout << "extended fingers: " << extendedFingers << endl;
+    if(extendedFingers == 0){
+        color_mode = true;
+    }
+    else{
+        color_mode = false;
     }
     
     
@@ -309,10 +323,10 @@ void LeapListener::onFrame(const Controller& controller) {
 
         if (circle.pointable().direction().angleTo(circle.normal()) <= PI/2) {
           clockwiseness = "clockwise";
-          color_mode = true;
+          //color_mode = true;
         } else {
           clockwiseness = "counterclockwise";
-          color_mode = false;
+          //color_mode = false;
         }
 
         // Calculate angle swept since last frame
