@@ -47,6 +47,8 @@ void LeapListener::onFrame(const Controller& controller) {
 //            << ", gestures: " << frame.gestures().count() << std::endl;
 
   HandList hands = frame.hands();
+    float left_y = 0.0;
+    float right_y = 0.0;
   for (HandList::const_iterator hl = hands.begin(); hl != hands.end(); ++hl)
   {
     // Get the first hand
@@ -57,7 +59,12 @@ void LeapListener::onFrame(const Controller& controller) {
     // Get the hand's normal vector and direction
     const Vector normal = hand.palmNormal();
     const Vector direction = hand.direction();
-
+      if(hand.isLeft()){
+          left_y = normal.y;
+      }
+      else{
+          right_y = normal.y;
+      }
 //    // Calculate the hand's pitch, roll, and yaw angles
 //    std::cout << std::string(2, ' ') <<  "pitch: " << direction.pitch() * RAD_TO_DEG << " degrees, "
 //              << "roll: " << normal.roll() * RAD_TO_DEG << " degrees, "
@@ -163,8 +170,20 @@ void LeapListener::onFrame(const Controller& controller) {
                         x += pos.x;
                         y += pos.y;
                         z += pos.z;
+                        xs[index] = pos.x;
+                        ys[index] = pos.y;
+                        zs[index] = pos.z;
+                        index = (index + 1) % 30;
                         if(draw_mode){
-                            if(count == 30){
+                            x = 0;
+                            y = 0;
+                            z = 0;
+                            if(count == 15){
+                                for(int i = 0; i < 30; i++){
+                                    x+=xs[i];
+                                    y+=ys[i];
+                                    z+=zs[i];
+                                }
                                 x = x / 30;
                                 y = y / 30;
                                 z = z / 30;
@@ -178,8 +197,8 @@ void LeapListener::onFrame(const Controller& controller) {
                                         //Check 1, we need the starting point be connect to something or on the floor, otherwise, don't draw
                                         if(blist.size() > 0 && blist[total_number_of_points].isInfinite()){
                                             //If it's infinite, then we need it to within range of some end points
-                                            cout << "1111111" << endl;
-                                            if(y < 2){
+                                            //cout << "1111111" << endl;
+                                            if(y < 2 || y > 20){
                                                 sample_points.push_back(Vector3(x,y,z));
                                                 total_number_of_points++;
                                                 Brick b = Brick(color);
@@ -238,11 +257,13 @@ void LeapListener::onFrame(const Controller& controller) {
             }
         }
         if(finger.type() == finger.TYPE_MIDDLE){
+            //cout << finger.direction() << endl;
             // Get finger bones
                 for (int b = 0; b < 4; ++b) {
                     Bone::Type boneType = static_cast<Bone::Type>(b);
                     Bone bone = finger.bone(boneType);
                     if(boneType == bone.TYPE_DISTAL){
+                        
                         //                        std::cout << std::string(6, ' ') <<  boneNames[boneType]
                         //                            << " bone, start: " << bone.prevJoint()
                         //                            << ", end: " << bone.nextJoint()
@@ -256,11 +277,15 @@ void LeapListener::onFrame(const Controller& controller) {
                         }
                     }
                 }
-
         }
     }
   }
 
+    if(left_y > 0 && right_y > 0){
+        physics_start = true;
+    }
+    
+    
   // Get tools
   const ToolList tools = frame.tools();
   for (ToolList::const_iterator tl = tools.begin(); tl != tools.end(); ++tl) {

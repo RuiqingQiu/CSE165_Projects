@@ -39,6 +39,7 @@ namespace Globals
     //LeapListener listener;
     int draw_mode = 0; // 0 for no draw, 1 for draw
     btCompoundShape* compound;
+    btRigidBody* whole;
 }
 
 //1 for homework 1

@@ -15,18 +15,17 @@ Brick::Brick(Vector3 color){
     m_color = color;
 }
 
-void Brick::draw2(btTransform b){
-    if(m_y < 0.5){
-        glPushMatrix();
-        glMultMatrixf(m_mat);
+void Brick::draw2(btTransform t, btTransform b){
+    if(b.getOrigin().getY() + t.getOrigin().getY() < 0.5){
         glColor3f(m_color.getX(), m_color.getY(), m_color.getZ());
-        //glutSolidCube(length);
-        glPopMatrix();
+        m_x = b.getOrigin().getX() + t.getOrigin().getX();
+        m_y = 0.5f;
+        m_z = b.getOrigin().getZ() + t.getOrigin().getZ();
     }
     else{
-        m_x = b.getOrigin().getX();
-        m_y = b.getOrigin().getY();
-        m_z = b.getOrigin().getZ();
+        m_x = b.getOrigin().getX() + t.getOrigin().getX();
+        m_y = b.getOrigin().getY() + t.getOrigin().getY();
+        m_z = b.getOrigin().getZ() + t.getOrigin().getZ();
         float mat[16];
         b.getOpenGLMatrix(mat);
         for(int i = 0; i < 16; i++){

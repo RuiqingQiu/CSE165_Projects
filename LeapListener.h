@@ -45,6 +45,13 @@ public:
     double y = 0.0;
     double z = 0.0;
     int total_number_of_points = 0;
+    int index = 0;
+    float xs[30];
+    float ys[30];
+    float zs[30];
+    float xs1[30];
+    float ys1[30];
+    float zs1[30];
 private:
 };
 

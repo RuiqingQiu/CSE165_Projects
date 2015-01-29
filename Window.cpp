@@ -247,7 +247,7 @@ void Window::start_physics(){
             count++;
         }
         else{
-            listener.blist[i].physics(listener.blist[i].m_x, listener.blist[i].m_y, listener.blist[i].m_z, 0.5, 0.1);
+            listener.blist[i].physics(listener.blist[i].m_x, listener.blist[i].m_y, listener.blist[i].m_z, 0.5, 1);
             btTransform trans;
             trans.setIdentity();
             trans.setOrigin(btVector3(listener.blist[i].m_x, listener.blist[i].m_y, listener.blist[i].m_z));
@@ -262,7 +262,8 @@ void Window::start_physics(){
                 //create constraint
                 if(i != last){
                     btFixedConstraint * joint6DOF;
-                    
+                    //btGeneric6DofConstraint *joint6DOF;
+                    //btGeneric6DofSpringConstraint* joint6DOF;
                     btTransform localA, localB, toground;
                     
                     bool useLinearReferenceFrameA = true;
@@ -270,40 +271,155 @@ void Window::start_physics(){
                     localA.setIdentity(); localB.setIdentity();
                     
                     float y_dist = abs(listener.blist[connect_index].m_y - listener.blist[i].m_y);
-                    cout << y_dist << endl;
+                    //cout << y_dist << endl;
                     if(y_dist < 0.5){
                         y_dist = 0.5;
                     }
                     localA.setOrigin(btVector3(0,-y_dist,0));
                     
                     localB.setOrigin(btVector3(0,y_dist,0));
-                    cout << "last is " << last << endl;
-                    cout << "current is " << i << endl;
+                    //cout << "last is " << last << endl;
+                    //cout << "current is " << i << endl;
                     btTransform frameInA;
                     listener.blist[connect_index].rb->getMotionState()->getWorldTransform(frameInA);
                     btTransform frameInB;
                     listener.blist[i].rb->getMotionState()->getWorldTransform(frameInB);
-                    joint6DOF = new btFixedConstraint(*listener.blist[connect_index].rb, *listener.blist[i].rb,
-                                                      frameInA,frameInB
-                                                      );
+                    joint6DOF = new btFixedConstraint(*listener.blist[connect_index].rb, *listener.blist[i].rb,frameInA,frameInB);
                     
-                    //joint6DOF = new btGeneric6DofConstraint(*listener.blist[last].rb, *listener.blist[i].rb, localA, localB,useLinearReferenceFrameA);
+                    //joint6DOF = new btGeneric6DofSpringConstraint(*listener.blist[last].rb, *listener.blist[i].rb, localA, localB,useLinearReferenceFrameA);
                     
-                    //joint6DOF->setLinearLowerLimit(btVector3(0,0,0));
-                    //joint6DOF->setLinearUpperLimit(btVector3(0,0,0));
-                    //joint6DOF->setAngularLowerLimit(btVector3(0,0,0));
-                    //joint6DOF->setAngularUpperLimit(btVector3(0,0,0));
+//                    joint6DOF->setLinearLowerLimit(btVector3(0,0,0));
+//                    joint6DOF->setLinearUpperLimit(btVector3(0,0,0));
+//                    joint6DOF->setAngularLowerLimit(btVector3(0,0,0));
+//                    joint6DOF->setAngularUpperLimit(btVector3(0,0,0));
+//                    
+//                    joint6DOF->setEquilibriumPoint();
+//                    joint6DOF->enableSpring(0, false);
+                    
+                    joint6DOF->setParam(BT_CONSTRAINT_STOP_CFM, 1, 0);
+                    joint6DOF->setParam(BT_CONSTRAINT_STOP_CFM, 1, 1);
+                    joint6DOF->setParam(BT_CONSTRAINT_STOP_CFM, 1, 2);
+                    joint6DOF->setParam(BT_CONSTRAINT_STOP_CFM, 1, 3);
+                    joint6DOF->setParam(BT_CONSTRAINT_STOP_CFM, 1, 4);
+                    joint6DOF->setParam(BT_CONSTRAINT_STOP_CFM, 1, 5);
+                    
+                    joint6DOF->setParam(BT_CONSTRAINT_STOP_ERP, 0.5f,0);
+                    joint6DOF->setParam(BT_CONSTRAINT_STOP_ERP, 0.5f,1);
+
+                    joint6DOF->setParam(BT_CONSTRAINT_STOP_ERP, 0.5f,2);
+
+                    joint6DOF->setParam(BT_CONSTRAINT_STOP_ERP, 0.5f,3);
+
+                    joint6DOF->setParam(BT_CONSTRAINT_STOP_ERP, 0.5f,4);
+
+                    joint6DOF->setParam(BT_CONSTRAINT_STOP_ERP, 0.5f,5);
+
+
                     Globals::dynamicsWorld->addConstraint(joint6DOF);
                     last = i;
                 }
             }
         }
     }
+
+//    for(int i = 0; i < listener.blist.size();i++){
+//        if(listener.blist[i].m_x >= 1000.0 || listener.blist[i].m_y >= 1000.0 || listener.blist[i].m_z >= 1000.0){
+//        }
+//        else{
+//            for(int j = i+1; j < i+3;j++){
+//                if(listener.blist[j].m_x >= 1000.0 || listener.blist[j].m_y >= 1000.0 || listener.blist[j].m_z >= 1000.0)
+//                    continue;
+//                //btFixedConstraint * joint6DOF;
+//                //btGeneric6DofConstraint *joint6DOF;
+//                btGeneric6DofSpringConstraint* joint6DOF;
+//                btTransform localA, localB, toground;
+//                
+//                bool useLinearReferenceFrameA = true;
+//                
+//                localA.setIdentity(); localB.setIdentity();
+//                
+//                float y_dist = abs(listener.blist[j].m_y - listener.blist[i].m_y);
+//                //cout << y_dist << endl;
+//                if(y_dist < 0.5){
+//                    y_dist = 0.5;
+//                }
+//                localA.setOrigin(btVector3(0,-y_dist,0));
+//                
+//                localB.setOrigin(btVector3(0,y_dist,0));
+//                //cout << "last is " << last << endl;
+//                //cout << "current is " << i << endl;
+//                btTransform frameInA;
+//                listener.blist[j].rb->getMotionState()->getWorldTransform(frameInA);
+//                btTransform frameInB;
+//                listener.blist[i].rb->getMotionState()->getWorldTransform(frameInB);
+//                
+//                
+//                joint6DOF = new btGeneric6DofSpringConstraint(*listener.blist[j].rb, *listener.blist[i].rb, localA, localB,useLinearReferenceFrameA);
+//                
+//                joint6DOF->setLinearLowerLimit(btVector3(0,0,0));
+//                joint6DOF->setLinearUpperLimit(btVector3(0,0,0));
+//                joint6DOF->setAngularLowerLimit(btVector3(0,0,0));
+//                joint6DOF->setAngularUpperLimit(btVector3(0,0,0));
+//                
+//                joint6DOF->setEquilibriumPoint();
+//                joint6DOF->setStiffness(0, 20);
+//                joint6DOF->setStiffness(1, 20);
+//                joint6DOF->setStiffness(2, 20);
+//                joint6DOF->setStiffness(3, 20);
+//                joint6DOF->setStiffness(4, 20);
+//                joint6DOF->setStiffness(5, 20);
+//                
+//                joint6DOF->setParam(BT_CONSTRAINT_STOP_CFM, 1, 0);
+//                joint6DOF->setParam(BT_CONSTRAINT_STOP_CFM, 1, 1);
+//                joint6DOF->setParam(BT_CONSTRAINT_STOP_CFM, 1, 2);
+//                joint6DOF->setParam(BT_CONSTRAINT_STOP_CFM, 1, 3);
+//                joint6DOF->setParam(BT_CONSTRAINT_STOP_CFM, 1, 4);
+//                joint6DOF->setParam(BT_CONSTRAINT_STOP_CFM, 1, 5);
+//                
+//                joint6DOF->setParam(BT_CONSTRAINT_STOP_ERP, 0.5f,0);
+//                joint6DOF->setParam(BT_CONSTRAINT_STOP_ERP, 0.5f,1);
+//                
+//                joint6DOF->setParam(BT_CONSTRAINT_STOP_ERP, 0.5f,2);
+//                
+//                joint6DOF->setParam(BT_CONSTRAINT_STOP_ERP, 0.5f,3);
+//                
+//                joint6DOF->setParam(BT_CONSTRAINT_STOP_ERP, 0.5f,4);
+//                
+//                joint6DOF->setParam(BT_CONSTRAINT_STOP_ERP, 0.5f,5);
+//                
+//                
+//                Globals::dynamicsWorld->addConstraint(joint6DOF);
+//            }
+//        }
+//    }
+    btTransform t2;
+    
+    t2.setIdentity();
+    
+    t2.setOrigin(btVector3(0,0,0));
+    //btCylinderShape* box = new btCylinderShape(btVector3(0.2f,0.2f,0.2f));
+    btVector3 inertia(0,0,0);
+    float mass = 100;
+    Globals::compound->calculateLocalInertia(mass,inertia);
+    btDefaultMotionState* MotionState =
+    new btDefaultMotionState(t2);
+    btRigidBody::btRigidBodyConstructionInfo info(mass,MotionState,Globals::compound,inertia); //motion state would actually be non-null in most real usages
+    info.m_restitution = 1.0f;
+    //info.m_friction = 1.5f;
+    Globals::whole = new btRigidBody(info);
+    //rb->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
+    Globals::dynamicsWorld->addRigidBody(Globals::whole);
     listener.physics_state_changed = false;
     //Need to add shape to world
     cout << "physics compund shape contains: " << count << endl;
 }
 void Window::draw2(){
+    
+    glColor4f(1,1,1,1);
+    glBegin(GL_LINES);
+    glVertex3f(-50,20,0);
+    glVertex3f(50,20,0);
+    glEnd();
     
     glColor4f(0.3f,0.3f,0.3f,1);
     glBegin(GL_QUADS);
@@ -373,10 +489,13 @@ void Window::draw2(){
                 else{
                     if(listener.physics_start && !listener.physics_state_changed){
                         //Draw here is to update the location that stored in brick
-                        cout << i << endl;
-                        listener.blist[i].draw(world, 0.5);
-                        //listener.blist[i].draw2(Globals::compound->getChildTransform(i-1));
-                        
+                        //cout << i << endl;
+                        //listener.blist[i].draw(world, 0.5);
+                        btTransform trans;
+                        Globals::whole->getMotionState()->getWorldTransform(trans);
+                        //cout << trans.getOrigin().getX() << " " << trans.getOrigin().getY() << " " << trans.getOrigin().getZ() << endl;
+
+                        listener.blist[i].draw2(trans, Globals::compound->getChildTransform(i-1));
                     }
                     if(listener.blist[i].getConnection() == -1)
                         last = i;
@@ -384,6 +503,8 @@ void Window::draw2(){
                         Brick connect = listener.blist[listener.blist[i].getConnection()];
                         if(i != last){
                             glColor3f(listener.blist[i].m_color.x,listener.blist[i].m_color.y,listener.blist[i].m_color.z);
+                            //cout << connect.m_x << " " << connect.m_y << " " << connect.m_z << endl;
+                            //cout << listener.blist[i].m_x << listener.blist[i].m_y << listener.blist[i].m_z << endl;
                             glLine(Vector3(connect.m_x, connect.m_y, connect.m_z),Vector3(listener.blist[i].m_x,listener.blist[i].m_y,listener.blist[i].m_z),0.5,360);
                             last = i;
                         }

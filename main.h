@@ -44,6 +44,7 @@ namespace Globals
     //extern LeapListener listener;
     extern int draw_mode;
     extern btCompoundShape* compound;
+    extern btRigidBody* whole;
 };
 void physics_setup();
 void physics_cleanup();
