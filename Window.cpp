@@ -466,7 +466,7 @@ void Window::draw2(){
     glutSolidCube(2);
     endTranslate();
     cursor.setLocation(listener.pos.x, listener.pos.y, listener.pos.z);
-    cursor.physics(listener.pos.x, listener.pos.y, listener.pos.z);
+    //cursor.physics(listener.pos.x, listener.pos.y, listener.pos.z);
     cursor.draw(Globals::camera->getMatrix()*world, cursor.radius);
     glLineWidth(2.5);
     

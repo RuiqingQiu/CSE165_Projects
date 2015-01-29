@@ -122,7 +122,7 @@ void LeapListener::onFrame(const Controller& controller) {
                 //physics_start = true;
             }
         }
-        if(hand.isLeft()){
+        if(hand.isLeft() && !physics_start){
             float pinch = hand.pinchStrength();
             //cout << pinch << endl;
             if(pinch == 0.0){
@@ -283,6 +283,7 @@ void LeapListener::onFrame(const Controller& controller) {
 
     if(left_y > 0 && right_y > 0){
         physics_start = true;
+        draw_mode = false;
     }
     
     
