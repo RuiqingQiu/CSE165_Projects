@@ -469,6 +469,8 @@ void Window::draw2(){
     cursor.physics(listener.pos.x, listener.pos.y, listener.pos.z);
     cursor.draw(Globals::camera->getMatrix()*world, cursor.radius);
     glLineWidth(2.5);
+
+    
     
     int last = 0;
     bool linked = false;
@@ -494,7 +496,13 @@ void Window::draw2(){
                         btTransform trans;
                         Globals::whole->getMotionState()->getWorldTransform(trans);
                         //cout << trans.getOrigin().getX() << " " << trans.getOrigin().getY() << " " << trans.getOrigin().getZ() << endl;
-
+//                        glPushMatrix();
+//                        Globals::whole->getMotionState()->getWorldTransform(trans);
+//                        float mat[16];
+//                        trans.getOpenGLMatrix(mat);
+//                        glMultMatrixf(mat);
+//                        glutSolidCube(5);
+//                        glPopMatrix();
                         listener.blist[i].draw2(trans, Globals::compound->getChildTransform(i-1));
                     }
                     if(listener.blist[i].getConnection() == -1)
