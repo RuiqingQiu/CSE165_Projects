@@ -85,11 +85,7 @@ void LeapListener::onFrame(const Controller& controller) {
       Vector3 thumb_pos = Vector3(0,0,0);
     for (FingerList::const_iterator fl = fingers.begin(); fl != fingers.end(); ++fl) {
         const Finger finger = *fl;
-//      std::cout << std::string(4, ' ') <<  fingerNames[finger.type()]
-//                << " finger, id: " << finger.id()
-//                << ", length: " << finger.length()
-//                << "mm, width: " << finger.width() << std::endl;
-        
+
         //The left hand pinch is used to draw or not draw
         if(hand.isRight()){
             if(finger.type() == finger.TYPE_INDEX){
@@ -117,17 +113,15 @@ void LeapListener::onFrame(const Controller& controller) {
                     }
                 }
             }
-            //index_pos.print("index");
-            //thumb_pos.print("thumb");
-            //cout << "distance :" << index_pos.distance(thumb_pos) << endl;
             
             if(index_pos.distance(thumb_pos) < 70){
                 //physics_start = true;
             }
         }
+        // right hand to control the draw_mode
         if(hand.isRight() && !physics_start){
             float pinch = hand.pinchStrength();
-            //cout << pinch << endl;
+            // if all fingers are seperate apart
             if(pinch == 0.0){
                 //End point reached, put a infinite point to indicate end
                 if(draw_mode == true){
@@ -156,10 +150,7 @@ void LeapListener::onFrame(const Controller& controller) {
                     total_number_of_points++;
                     last_stroke_points = total_number_of_points;
                 }
-                
                 draw_mode = false;
-                //Add a point to indicate the line is done
-
             }
             else{
                 draw_mode = true;
