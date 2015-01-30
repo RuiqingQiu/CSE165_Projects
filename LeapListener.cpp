@@ -125,7 +125,7 @@ void LeapListener::onFrame(const Controller& controller) {
                 //physics_start = true;
             }
         }
-        if(hand.isLeft() && !physics_start){
+        if(hand.isRight() && !physics_start){
             float pinch = hand.pinchStrength();
             //cout << pinch << endl;
             if(pinch == 0.0){
@@ -139,7 +139,7 @@ void LeapListener::onFrame(const Controller& controller) {
                     //Find a connecting point for current line if within range to snap onto end point
                     Vector3 start = Vector3(blist[total_number_of_points-1].m_x,blist[total_number_of_points-1].m_y,blist[total_number_of_points-1].m_z);
                     float min = 1000;
-                    float range = 20;
+                    float range = 5;
                     int snapping_point = -1;
                     for(int i = 0; i < last_stroke_points; i++){
                         Vector3 current = Vector3(blist[i].m_x,blist[i].m_y,blist[i].m_z);
@@ -179,14 +179,18 @@ void LeapListener::onFrame(const Controller& controller) {
 //                            << ", end: " << bone.nextJoint()
 //                            << ", direction: " << bone.direction() << std::endl;
                     if(hand.isRight()){
-                        pos.x = bone.prevJoint().x-50;
-                        if((bone.prevJoint().y - 100) < 0){
-                            pos.y = 0;
-                        }
-                        else{
-                            pos.y = bone.prevJoint().y - 100;
-                        }
-                        pos.z = bone.prevJoint().z;
+                        pos.x = hand.palmPosition().x * 0.2 - 10;
+                        pos.y = hand.palmPosition().y * 0.2 - 10;
+                        pos.z = hand.palmPosition().z * 0.2;
+
+//                        pos.x = bone.prevJoint().x-50;
+//                        if((bone.prevJoint().y - 100) < 0){
+//                            pos.y = 0;
+//                        }
+//                        else{
+//                            pos.y = bone.prevJoint().y - 100;
+//                        }
+//                        pos.z = bone.prevJoint().z;
 
                         x += pos.x;
                         y += pos.y;
@@ -290,16 +294,16 @@ void LeapListener::onFrame(const Controller& controller) {
                         //                            << ", end: " << bone.nextJoint()
                         //                            << ", direction: " << bone.direction() << std::endl;
                         if(hand.isLeft() && color_mode){
-                            color.x = abs(bone.prevJoint().x);
-                            color.y = abs(bone.prevJoint().y-100);
-                            color.z = abs(bone.prevJoint().z);
+                            color.x = abs(hand.palmPosition().x);
+                            color.y = abs(hand.palmPosition().y-100);
+                            color.z = abs(hand.palmPosition().z);
                             color.normalize();
                             //color.print("color is ");
                         }
                     }
                 }
         }
-        if(hand.isRight()&& finger.isExtended()){
+        if(hand.isLeft()&& finger.isExtended()){
             extendedFingers++;
         }
     }
